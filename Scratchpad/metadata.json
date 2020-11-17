@@ -1,0 +1,6 @@
+{
+    "itemDisplayName": "MCU DevTest Labs environment",
+    "description": "This template creates an Azure SQL VM",
+    "githubUsername": "maxim-shaw",
+    "summary": "Deploys an Azure SQL instance as an environment in a DevTest Lab."
+  }
