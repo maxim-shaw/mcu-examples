@@ -1,13 +1,7 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "Environment Number": {
-            "type": "int",
-            "metadata": {
-                "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
-            }
-        },
         "Database Administrator Login": {
             "type": "string",
             "metadata": {
@@ -19,75 +13,18 @@
             "metadata": {
                 "description": "Database administrator password"
             }
-        },
-        "Application VM Size": {
-            "type": "string",
-            "defaultValue": "Standard_B2ms",
-            "allowedValues": [
-                "Standard_B2ms",
-                "Standard_B2s",
-                "Standard_B4ms"
-            ],
-            "metadata": {
-                "description": "Size of application server VM"
-            }
-        },
-        "Database VM Size": {
-            "type": "string",
-            "defaultValue": "Standard_B4ms",
-            "allowedValues": [
-                "Standard_B2ms",
-                "Standard_B2s",
-                "Standard_B4ms"
-            ],
-            "metadata": {
-                "description": "Size of database server VM"
-            }
         }
     },
     "variables": {
-        "resourceNamePrefix": "AZ1",
-        "applicationVMName": "[concat(variables('resourceNamePrefix'),'ASD', parameters('Environment Number'))]",
-        "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
-        "databaseName": "[concat('db-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
-        "databaseServerName": "[concat('dbs-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
+        "resourceNamePrefix": "[take(uniqueString(resourceGroup().id), 3)]",
         "hostingPlanName": "[toLower(concat(variables('resourceNamePrefix'), '-', take(uniqueString(resourceGroup().id), 6), '-sp'))]",
         "siteName": "[toLower(concat(variables('resourceNamePrefix'), '-', take(uniqueString(resourceGroup().id), 6)))]",
         "serverName": "[toLower(concat(variables('resourceNamePrefix'), '-', take(uniqueString(resourceGroup().id), 6), '-db'))]",
+        "databaseName": "[concat('db', uniqueString(resourceGroup().id, variables('siteName')))]",
         "databaseVersion": "12.0"
     },
     "resources": [
-        // {
-        //     "name": "[variables('hostingPlanName')]",
-        //     "type": "Microsoft.Web/serverfarms",
-        //     "apiVersion": "2016-09-01",
-        //     "location": "[resourceGroup().location]",
-        //     "properties": {
-        //         "name": "[variables('hostingPlanName')]",
-        //         "workerSize": "1",
-        //         "hostingEnvironment": "",
-        //         "numberOfWorkers": 0
-        //     },
-        //     "sku": {
-        //         "Tier": "Standard",
-        //         "Name": "S1"
-        //     }
-        // },
-        // {
-        //     "name": "[variables('siteName')]",
-        //     "type": "Microsoft.Web/sites",
-        //     "apiVersion": "2018-11-01",
-        //     "location": "[resourceGroup().location]",
-        //     "dependsOn": [
-        //         "[concat('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]"
-        //     ],
-        //     "properties": {
-        //         "name": "[variables('siteName')]",
-        //         "serverFarmId": "[variables('hostingPlanName')]",
-        //         "hostingEnvironment": ""
-        //     }
-        // },
-        {
+         {
             "name": "[variables('serverName')]",
             "type": "Microsoft.Sql/servers",
             "apiVersion": "2014-04-01",
@@ -101,15 +38,15 @@
                 {
                     "name": "[variables('databaseName')]",
                     "type": "databases",
-                    "apiVersion": "2020-08-01-preview",
+                    "apiVersion": "2015-01-01",
                     "location": "[resourceGroup().location]",
                     "dependsOn": [
-                        "[variables('databaseServerName')]"
+                        "[variables('serverName')]"
                     ],
                     "properties": {
                         "edition": "Basic",
                         "collation": "SQL_Latin1_General_CP1_CI_AS",
-                        "maxSizeBytes": 1073741824,
+                        "maxSizeBytes": "1073741824",
                         "requestedServiceObjectiveName": "Basic"
                     }
                 },
@@ -117,7 +54,7 @@
                     "type": "firewallrules",
                     "apiVersion": "2014-04-01",
                     "dependsOn": [
-                        "[variables('databaseServerName')]"
+                        "[variables('serverName')]"
                     ],
                     "location": "[resourceGroup().location]",
                     "name": "AllowAllWindowsAzureIps",
