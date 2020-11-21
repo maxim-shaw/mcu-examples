@@ -95,7 +95,7 @@
             "properties": {
                 "administratorLogin": "[parameters('Database Administrator Login')]",
                 "administratorLoginPassword": "[parameters('Database Administrator Login Password')]",
-                "version": "[variables('databaseVersion')]",
+                "version": "[variables('databaseVersion')]"
             },
             "resources": [
                 {
