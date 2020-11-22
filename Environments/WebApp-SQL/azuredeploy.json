@@ -46,8 +46,9 @@
         }
     },
     "variables": {
+        "resourceNamePrefix": "AZ1",
         "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
-        "databaseName": "[concat('db-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
+        "databaseName": "[concat('db-mcu-', toLower(variables('resourceNamePrefix')), '-', parameters('Environment Number'))]",
         "databaseServerName": "[concat('dbs-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
         "resourceNamePrefix": "[take(uniqueString(resourceGroup().id), 3)]",
         "hostingPlanName": "[toLower(concat(variables('resourceNamePrefix'), '-', take(uniqueString(resourceGroup().id), 6), '-sp'))]",
@@ -58,7 +59,7 @@
     },
     "resources": [
          {
-            "name": "[variables('serverName')]",
+            "name": "[variables('databaseServerName')]",
             "type": "Microsoft.Sql/servers",
             "apiVersion": "2014-04-01",
             "location": "[resourceGroup().location]",
