@@ -43,6 +43,10 @@
             "metadata": {
                 "description": "Size of database server VM"
             }
+        },
+        "DTLSubnetId": {
+            "type": "string",
+            "defaultValue": "$(LabSubnetId)"
         }
     },
     "variables": {
