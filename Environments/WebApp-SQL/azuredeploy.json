@@ -100,7 +100,8 @@
                             "createOption": "attach",
                             "managedDisk": {
                                 "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
-                            }   
+                            },
+                            "diskSizeGB": 1024
                         }
                     ]
                 },
