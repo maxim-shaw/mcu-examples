@@ -62,7 +62,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
-            "name": "[concat(variables('databaseVmName'))]",
+            "name": "[variables('databaseVmName')]",
             "location": "canadacentral",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
@@ -92,18 +92,29 @@
                         //     "id": "[parameters('disks_AZ1ADSMCUPOC101_OsDisk_1_bf0f3232082f4093838e4882c2fbae0d_externalid')]"
                         // },
                         "diskSizeGB": 127
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[variables('databaseDataDisk')]",
+                            "createOption": "attach",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
+                            }   
+                        }
+                    ]
                 },
-                "dataDisks": [
-                    {
-                        "lun": 0,
-                        "name": "[variables('databaseDataDisk')]",
-                        "createOption": "attach",
-                        "managedDisk": {
-                            "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
-                        }   
-                    }
-                ]
-
+                "osProfile": {
+                    "computerName": "[variables('databaseVmName')]",
+                    "adminUsername": "maxim",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": "[parameters('Database Administrator Login Password')]",
+                    "allowExtensionOperations": true,
+                    "requireGuestProvisionSignal": true
+                }
             }
         }
         //  {
