@@ -269,6 +269,13 @@
                     //"secrets": "[]",
                     "allowExtensionOperations": true,
                     "requireGuestProvisionSignal": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
                 }
             }
         }
