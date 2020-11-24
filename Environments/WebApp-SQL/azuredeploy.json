@@ -44,23 +44,30 @@
                 "description": "Size of database server VM"
             }
         },
-        "existingVnetResourceGroup": {
+        "existingVirtualNetworkName": {
             "type": "String",
-            "defaultValue": "[resourceGroup().name]",
             "metadata": {
-                "description": "Specify the resrouce group of the existing VNet"
+                "description": "Specify the name of an existing VNet in the same resource group"
             }
         },
+
+        // "existingVnetResourceGroup": {
+        //     "type": "String",
+        //     "defaultValue": "[resourceGroup().name]",
+        //     "metadata": {
+        //         "description": "Specify the resrouce group of the existing VNet"
+        //     }
+        // },
         "existingSubnetName": {
             "type": "String",
             "metadata": {
                 "description": "Specify the name of the Subnet Name"
             }
-        },
-        "DTLSubnetId": {
-            "type": "string",
-            "defaultValue": "$(LabSubnetId)"
         }
+        // "DTLSubnetId": {
+        //     "type": "string",
+        //     "defaultValue": "$(LabSubnetId)"
+        // }
     },
     "variables": {
         "resourceNamePrefix": "AZ1",
@@ -90,7 +97,7 @@
             }
         ],
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-        "subnetRef": "[resourceID(parameters('existingVNetResourceGroup'), 'Microsoft.Network/virtualNetWorks/subnets', parameters('existingVirtualNetworkName'), parameters('existingSubNetName'))]",
+        "subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('existingVirtualNetworkName'), parameters('existingSubNetName'))]"
     },
     "resources": [
         {
