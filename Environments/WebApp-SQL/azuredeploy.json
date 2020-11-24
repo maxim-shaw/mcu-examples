@@ -261,11 +261,11 @@
                 "osProfile": {
                     "computerName": "[variables('databaseVmName')]",
                     "adminUsername": "[parameters('VM Administrator Login')]",
+                    "adminPassword": "[parameters('VM Administrator Password')]",
                     "windowsConfiguration": {
                         "provisionVMAgent": true,
                         "enableAutomaticUpdates": true
                     },
-                    "password": "[parameters('VM Administrator Password')]",
                     //"secrets": "[]",
                     "allowExtensionOperations": true,
                     "requireGuestProvisionSignal": true
