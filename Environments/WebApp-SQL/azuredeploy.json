@@ -132,18 +132,18 @@
             ],
             "properties": {
                 "ipConfigurations": [
-                {
-                    "name": "ipconfig1",
-                    "properties": {
-                    "subnet": {
-                        "id": "[variables('subnetRef')]"
-                    },
-                    "privateIPAllocationMethod": "Dynamic",
-                    "publicIpAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                        "subnet": {
+                            "id": "[variables('subnetRef')]"
+                        },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
                     }
-                    }
-                }
                 ],
                 "enableAcceleratedNetworking": true,
                 "networkSecurityGroup": {
