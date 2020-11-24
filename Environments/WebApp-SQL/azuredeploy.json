@@ -8,13 +8,13 @@
                 "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
             }
         },
-        "Database Administrator Login": {
+        "VM Administrator Login": {
             "type": "string",
             "metadata": {
                 "description": "Database administrator login name"
             }
         },
-        "Database Administrator Login Password": {
+        "VM Administrator Password": {
             "type": "securestring",
             "metadata": {
                 "description": "Database administrator password"
@@ -260,12 +260,13 @@
                 },
                 "osProfile": {
                     "computerName": "[variables('databaseVmName')]",
-                    "adminUsername": "maxim",
+                    "adminUsername": "[parameters('VM Administrator Login')]",
                     "windowsConfiguration": {
                         "provisionVMAgent": true,
                         "enableAutomaticUpdates": true
                     },
-                    "secrets": "[parameters('Database Administrator Login Password')]",
+                    "password": "[parameters('VM Administrator Password')]",
+                    //"secrets": "[]",
                     "allowExtensionOperations": true,
                     "requireGuestProvisionSignal": true
                 }
