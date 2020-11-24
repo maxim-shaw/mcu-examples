@@ -44,43 +44,6 @@
                 "description": "Size of database server VM"
             }
         },
-        "virtualNetworkNewOrExisting": {
-            "type": "string",
-            "defaultValue": "new",
-            "metadata": {
-                "description": "Determines whether or not a new virtual network should be provisioned."
-            }
-            },
-            "virtualNetworkName": {
-            "type": "string",
-            "defaultValue": "VirtualNetwork",
-            "metadata": {
-                "description": "Name of the virtual network"
-            }
-            },
-            "addressPrefixes": {
-            "type": "array",
-            "defaultValue": [
-                "10.0.0.0/16"
-            ],
-            "metadata": {
-                "description": "Address prefix of the virtual network"
-            }
-            },
-            "subnetName": {
-            "type": "string",
-            "defaultValue": "default",
-            "metadata": {
-                "description": "Name of the subnet"
-            }
-            },
-            "subnetPrefix": {
-            "type": "string",
-            "defaultValue": "10.0.0.0/24",
-            "metadata": {
-                "description": "Subnet prefix of the virtual network"
-            }
-        },
         // "existingVnetResourceGroup": {
         //     "type": "String",
         //     "defaultValue": "[resourceGroup().name]",
@@ -88,8 +51,17 @@
         //         "description": "Specify the resrouce group of the existing VNet"
         //     }
         // },
+        "existingVirtualNetworkName": {
+            "type": "String",
+            "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
+            "metadata": {
+                "description": "Specify the name of the Subnet Name"
+            }
+
+        },
         "existingSubnetName": {
             "type": "String",
+            "defaultValue": "default",
             "metadata": {
                 "description": "Specify the name of the Subnet Name"
             }
@@ -109,6 +81,7 @@
         //"databaseServerName": "[concat('dbs-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
         "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
         "databaseVersion": "12.0",
+        "labVirtualNetworkName": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
         "networkSecurityGroupRules": [
@@ -130,18 +103,6 @@
         "subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('existingVirtualNetworkName'), parameters('existingSubNetName'))]"
     },
     "resources": [
-        {
-            "condition": "[equals(parameters('newOrExisting'),'new')]",
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2017-06-01",
-            "name": "[variables('storageAccountName')]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "[variables('storageAccountType')]"
-            },
-            "kind": "Storage",
-            "properties": {}
-        },
         {
             "type": "Microsoft.Network/publicIpAddresses",
             "apiVersion": "2020-06-01",
