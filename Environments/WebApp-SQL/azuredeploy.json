@@ -89,23 +89,23 @@
             "properties": {
                 "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
             }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2017-03-30",
+            "name": "[variables('databaseDataDisk')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1024
+            }
         }
-        // ,
-        // {
-        //     "type": "Microsoft.Compute/disks",
-        //     "apiVersion": "2017-03-30",
-        //     "name": "[variables('databaseDataDisk')]",
-        //     "location": "[resourceGroup().location]",
-        //     "sku": {
-        //         "name": "Standard_LRS"
-        //     },
-        //     "properties": {
-        //         "creationData": {
-        //             "createOption": "Empty"
-        //         },
-        //         "diskSizeGB": 1024
-        //     }
-        // },
+        //,
         // {
         //     "type": "Microsoft.Compute/virtualMachines",
         //     "apiVersion": "2019-07-01",
