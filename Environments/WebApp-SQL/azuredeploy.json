@@ -52,125 +52,117 @@
     "variables": {
         "resourceNamePrefix": "AZ1",
         "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
-        "databaseName": "[concat('db-mcu-', toLower(variables('resourceNamePrefix')), '-', parameters('Environment Number'))]",
-        "databaseServerName": "[concat('dbs-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
-        "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),32))]",
-        //"databaseName": "[concat('db', uniqueString(resourceGroup().id, variables('siteName')))]",
-        "databaseVersion": "12.0"
+        "publicIpAddressName": "[concat(variables('databaseVmName'), '-publicip-', uniqueString(variables('databaseVmName')))]",
+        "publicIpAddressType": "Dynamic",
+        "publicIpAddressSku": "Basic",
+        //"databaseName": "[concat('db-mcu-', toLower(variables('resourceNamePrefix')), '-', parameters('Environment Number'))]",
+        //"databaseServerName": "[concat('dbs-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
+        "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
+        "databaseVersion": "12.0",
+        "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
+        "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
+        "networkSecurityGroupRules": [
+            {
+                "name": "RDP",
+                "properties": {
+                    "priority": 300,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "3389"
+                }
+            }
+        ]
     },
     "resources": [
         {
-            "type": "Microsoft.Compute/disks",
-            "apiVersion": "2017-03-30",
-            "name": "[variables('databaseDataDisk')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('publicIpAddressName')]",
             "location": "[resourceGroup().location]",
             "sku": {
-                "name": "Standard_LRS"
+                "name": "[variables('publicIpAddressSku')]"
             },
             "properties": {
-                "creationData": {
-                    "createOption": "Empty"
-                },
-                "diskSizeGB": 1024
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-07-01",
-            "name": "[variables('databaseVmName')]",
-            "location": "canadacentral",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
-            ],
-            "tags": {
-                "env": "DevTestLabs",
-                "ClientName": "MCU"
-            },
-            "properties": {
-                "hardvareProfile": {
-                    "vmSize": "[parameters('Database VM Size')]"
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "microsoftsqlserver",
-                        "offer": "sql2019-ws2019",
-                        "sku": "sqldev",
-                        "version": "latest"
-                    },
-                    "osDisk": {
-                        //"osType": "Windows",
-                        //"name": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),32))]",
-                        "createOption": "FromImage",
-                        //"caching": "ReadWrite",
-                        // "managedDisk": {
-                        //     "storageAccountType": "StandardSSD_LRS",
-                        //     "id": "[parameters('disks_AZ1ADSMCUPOC101_OsDisk_1_bf0f3232082f4093838e4882c2fbae0d_externalid')]"
-                        // },
-                        "diskSizeGB": 127
-                    },
-                    "dataDisks": [
-                        {
-                            "lun": 0,
-                            "name": "[variables('databaseDataDisk')]",
-                            "createOption": "attach",
-                            "managedDisk": {
-                                "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
-                            }
-                        }
-                    ]
-                },
-                "osProfile": {
-                    "computerName": "[variables('databaseVmName')]",
-                    "adminUsername": "maxim",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true
-                    },
-                    "secrets": "[parameters('Database Administrator Login Password')]",
-                    "allowExtensionOperations": true,
-                    "requireGuestProvisionSignal": true
-                }
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
             }
         }
-        //  {
-        //     "name": "[variables('databaseServerName')]",
-        //     "type": "Microsoft.Sql/servers",
-        //     "apiVersion": "2014-04-01",
+        // ,
+        // {
+        //     "type": "Microsoft.Compute/disks",
+        //     "apiVersion": "2017-03-30",
+        //     "name": "[variables('databaseDataDisk')]",
         //     "location": "[resourceGroup().location]",
-        //     "properties": {
-        //         "administratorLogin": "[parameters('Database Administrator Login')]",
-        //         "administratorLoginPassword": "[parameters('Database Administrator Login Password')]",
-        //         "version": "[variables('databaseVersion')]"
+        //     "sku": {
+        //         "name": "Standard_LRS"
         //     },
-            // "resources": [
-            //     {
-            //         "name": "[variables('databaseName')]",
-            //         "type": "databases",
-            //         "apiVersion": "2015-01-01",
-            //         "location": "[resourceGroup().location]",
-            //         "dependsOn": [
-            //             "[variables('databaseServerName')]"
-            //         ],
-            //         "properties": {
-            //             "edition": "Basic",
-            //             "collation": "SQL_Latin1_General_CP1_CI_AS",
-            //             "maxSizeBytes": "1073741824",
-            //             "requestedServiceObjectiveName": "Basic"
-            //         }
-            //     },
-            //     {
-            //         "type": "firewallrules",
-            //         "apiVersion": "2014-04-01",
-            //         "dependsOn": [
-            //             "[variables('databaseServerName')]"
-            //         ],
-            //         "location": "[resourceGroup().location]",
-            //         "name": "AllowAllWindowsAzureIps",
-            //         "properties": {
-            //             "endIpAddress": "0.0.0.0",
-            //             "startIpAddress": "0.0.0.0"
-            //         }
-            //     }
-            // ]
+        //     "properties": {
+        //         "creationData": {
+        //             "createOption": "Empty"
+        //         },
+        //         "diskSizeGB": 1024
+        //     }
+        // },
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines",
+        //     "apiVersion": "2019-07-01",
+        //     "name": "[variables('databaseVmName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
+        //     ],
+        //     "tags": {
+        //         "env": "DevTestLabs",
+        //         "ClientName": "MCU"
+        //     },
+        //     "properties": {
+        //         "hardwareProfile": {
+        //             "vmSize": "[parameters('Database VM Size')]"
+        //         },
+        //         "storageProfile": {
+        //             "imageReference": {
+        //                 "publisher": "microsoftsqlserver",
+        //                 "offer": "sql2019-ws2019",
+        //                 "sku": "sqldev",
+        //                 "version": "latest"
+        //             },
+        //             "osDisk": {
+        //                 //"osType": "Windows",
+        //                 //"name": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),32))]",
+        //                 "createOption": "FromImage",
+        //                 //"caching": "ReadWrite",
+        //                 // "managedDisk": {
+        //                 //     "storageAccountType": "StandardSSD_LRS",
+        //                 //     "id": "[parameters('disks_AZ1ADSMCUPOC101_OsDisk_1_bf0f3232082f4093838e4882c2fbae0d_externalid')]"
+        //                 // },
+        //                 "diskSizeGB": 127
+        //             },
+        //             "dataDisks": [
+        //                 {
+        //                     "lun": 0,
+        //                     "name": "[variables('databaseDataDisk')]",
+        //                     "createOption": "attach",
+        //                     "managedDisk": {
+        //                         "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
+        //                     }
+        //                 }
+        //             ]
+        //         },
+        //         "osProfile": {
+        //             "computerName": "[variables('databaseVmName')]",
+        //             "adminUsername": "maxim",
+        //             "windowsConfiguration": {
+        //                 "provisionVMAgent": true,
+        //                 "enableAutomaticUpdates": true
+        //             },
+        //             "secrets": "[parameters('Database Administrator Login Password')]",
+        //             "allowExtensionOperations": true,
+        //             "requireGuestProvisionSignal": true
+        //         }
+        //     }
+        // }
     ]
 }
