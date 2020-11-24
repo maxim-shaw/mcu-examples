@@ -46,7 +46,7 @@
         },
         "existingVnetResourceGroup": {
             "type": "String",
-            "defaultValue": "[resourceGroup().virtualNetworkName]",
+            "defaultValue": "[resourceGroup().name]",
             "metadata": {
                 "description": "Specify the resrouce group of the existing VNet"
             }
