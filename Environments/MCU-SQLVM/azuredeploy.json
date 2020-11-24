@@ -192,7 +192,7 @@
                         }
                     }
                 ],
-                "enableAcceleratedNetworking": true,
+                "enableAcceleratedNetworking": false,
                 "networkSecurityGroup": {
                     "id": "[variables('nsgId')]"
                 }
