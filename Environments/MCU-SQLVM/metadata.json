@@ -1,6 +1,6 @@
 {
   "itemDisplayName": "Meridian CU - TevTest Lab Environment with SQL VM",
   "description": "This template creates an Azure Web App with Azure SQL Database.",
-  "githubUsername": "maxim-shaw",
+  "githubUsername": "Meridian DevTestLabs PoC",
   "summary": "Deploys an Azure Web App with a SQL database as an environment in a DevTest Lab for MCU PoC."
 }
