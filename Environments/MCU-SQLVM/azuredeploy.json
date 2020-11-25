@@ -91,9 +91,9 @@
     "variables": {
         "resourceNamePrefix": "AZ1",
         "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
-        "publicIpAddressName": "[concat(variables('databaseVmName'), '-publicip-', uniqueString(variables('databaseVmName')))]",
-        "publicIpAddressType": "Dynamic",
-        "publicIpAddressSku": "Basic",
+        // "publicIpAddressName": "[concat(variables('databaseVmName'), '-publicip-', uniqueString(variables('databaseVmName')))]",
+        // "publicIpAddressType": "Dynamic",
+        // "publicIpAddressSku": "Basic",
         "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
@@ -146,18 +146,18 @@
                 }
             ]
         },
-        {
-            "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2020-06-01",
-            "name": "[variables('publicIpAddressName')]",
-            "location": "[resourceGroup().location]",
-            "sku": {
-                "name": "[variables('publicIpAddressSku')]"
-            },
-            "properties": {
-                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
-            }
-        },
+        // {
+        //     "type": "Microsoft.Network/publicIpAddresses",
+        //     "apiVersion": "2020-06-01",
+        //     "name": "[variables('publicIpAddressName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "sku": {
+        //         "name": "[variables('publicIpAddressSku')]"
+        //     },
+        //     "properties": {
+        //         "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+        //     }
+        // },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-06-01",
@@ -173,8 +173,8 @@
             "name": "[variables('networkInterfaceName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
-                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+                //"[resourceId('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -184,10 +184,10 @@
                         "subnet": {
                             "id": "[variables('subnetRef')]"
                         },
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIpAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
-                            }
+                            "privateIPAllocationMethod": "Dynamic"
+                            // "publicIpAddress": {
+                            //     "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            // }
                         }
                     }
                 ],
