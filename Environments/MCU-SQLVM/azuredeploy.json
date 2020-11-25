@@ -94,11 +94,7 @@
         "publicIpAddressName": "[concat(variables('databaseVmName'), '-publicip-', uniqueString(variables('databaseVmName')))]",
         "publicIpAddressType": "Dynamic",
         "publicIpAddressSku": "Basic",
-        //"databaseName": "[concat('db-mcu-', toLower(variables('resourceNamePrefix')), '-', parameters('Environment Number'))]",
-        //"databaseServerName": "[concat('dbs-mcu-', toLower(variables('resourceNamePrefix')), parameters('Environment Number'))]",
         "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
-        "databaseVersion": "12.0",
-        "labVirtualNetworkName": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
         "networkSecurityGroupRules": [
@@ -142,7 +138,10 @@
                         "[parameters('Virtual Network Name')]"
                     ],
                     "properties": {
-                        "addressPrefix": "[parameters('Subnet Prefix')]"
+                        "addressPrefix": "[parameters('Subnet Prefix')]",
+                        "networkSecurityGroup": {
+                            "id": "[variables('nsgId')]"
+                        }                        
                     }
                 }
             ]
@@ -219,7 +218,8 @@
             "name": "[variables('databaseVmName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
+                "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
             ],
             "tags": {
                 "env": "DevTestLabs",
@@ -237,14 +237,7 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        //"osType": "Windows",
-                        //"name": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),32))]",
                         "createOption": "FromImage",
-                        //"caching": "ReadWrite",
-                        // "managedDisk": {
-                        //     "storageAccountType": "StandardSSD_LRS",
-                        //     "id": "[parameters('disks_AZ1ADSMCUPOC101_OsDisk_1_bf0f3232082f4093838e4882c2fbae0d_externalid')]"
-                        // },
                         "diskSizeGB": 127
                     },
                     "dataDisks": [
