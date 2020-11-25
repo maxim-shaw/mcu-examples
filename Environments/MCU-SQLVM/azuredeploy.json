@@ -44,56 +44,53 @@
                 "description": "Size of database server VM"
             }
         },
-        // "existingVnetResourceGroup": {
+        // "Virtual Network Name": {
         //     "type": "String",
-        //     "defaultValue": "[resourceGroup().name]",
+        //     "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
         //     "metadata": {
-        //         "description": "Specify the resrouce group of the existing VNet"
+        //         "description": "Specify the name of the Subnet Name"
         //     }
-        // },
-        "Virtual Network Name": {
-            "type": "String",
-            "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
-            "metadata": {
-                "description": "Specify the name of the Subnet Name"
-            }
 
-        },
+        // },
         // "Subnet Name": {
         //     "type": "String",
-        //     "defaultValue": "default",
+        //     "defaultValue": "databaseSubnet",
         //     "metadata": {
         //         "description": "Specify the name of the Subnet Name"
         //     }
         // },
-        "vnetAddressPrefix": {
-        "type": "string",
-        "defaultValue": "10.0.0.0/16",
+        // "vnetAddressPrefix": {
+        // "type": "string",
+        // "defaultValue": "10.0.0.0/16",
+        //     "metadata": {
+        //         "description": "Address prefix"
+        //     }
+        // },
+        "Existing Virtual Network Name": {
+            "type": "String",
+            "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
             "metadata": {
-                "description": "Address prefix"
+                "description": "Specify the resrouce group of the existing VNet"
             }
         },
         "Subnet Name": {
         "type": "string",
-        "defaultValue": "Subnet1",
+        "defaultValue": "databaseSubnet",
             "metadata": {
                 "description": "Subnet 1 Name"
             }
-        },
-        "Subnet Prefix": {
-        "type": "string",
-        "defaultValue": "10.0.0.0/24",
-            "metadata": {
-                "description": "Subnet Prefix"
-            }
-        }
+        }//,
+        // "Subnet Prefix": {
+        // "type": "string",
+        // "defaultValue": "10.0.0.0/24",
+        //     "metadata": {
+        //         "description": "Subnet Prefix"
+        //     }
+        // }
     },
     "variables": {
         "resourceNamePrefix": "AZ1",
         "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
-        // "publicIpAddressName": "[concat(variables('databaseVmName'), '-publicip-', uniqueString(variables('databaseVmName')))]",
-        // "publicIpAddressType": "Dynamic",
-        // "publicIpAddressSku": "Basic",
         "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
@@ -113,50 +110,38 @@
             }
         ],
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-        "subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('Virtual Network Name'), parameters('Subnet Name'))]"
+        "subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2020-05-01",
-            "name": "[parameters('Virtual Network Name')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "[parameters('vnetAddressPrefix')]"
-                    ]
-                }
-            },
-            "resources": [
-                {
-                    "type": "subnets",
-                    "apiVersion": "2020-05-01",
-                    "location": "[resourceGroup().location]",
-                    "name": "[parameters('Subnet Name')]",
-                    "dependsOn": [
-                        "[parameters('Virtual Network Name')]"
-                    ],
-                    "properties": {
-                        "addressPrefix": "[parameters('Subnet Prefix')]",
-                        "networkSecurityGroup": {
-                            "id": "[variables('nsgId')]"
-                        }                        
-                    }
-                }
-            ]
-        },
         // {
-        //     "type": "Microsoft.Network/publicIpAddresses",
-        //     "apiVersion": "2020-06-01",
-        //     "name": "[variables('publicIpAddressName')]",
+        //     "type": "Microsoft.Network/virtualNetworks",
+        //     "apiVersion": "2020-05-01",
+        //     "name": "[parameters('Existing Virtual Network Name')]",
         //     "location": "[resourceGroup().location]",
-        //     "sku": {
-        //         "name": "[variables('publicIpAddressSku')]"
-        //     },
         //     "properties": {
-        //         "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
-        //     }
+        //         "addressSpace": {
+        //             "addressPrefixes": [
+        //                 "[parameters('vnetAddressPrefix')]"
+        //             ]
+        //         }
+        //     },
+        //     "resources": [
+        //         {
+        //             "type": "subnets",
+        //             "apiVersion": "2020-05-01",
+        //             "location": "[resourceGroup().location]",
+        //             "name": "[parameters('Subnet Name')]",
+        //             "dependsOn": [
+        //                 "[parameters('Virtual Network Name')]"
+        //             ],
+        //             "properties": {
+        //                 "addressPrefix": "[parameters('Subnet Prefix')]",
+        //                 "networkSecurityGroup": {
+        //                     "id": "[variables('nsgId')]"
+        //                 }                        
+        //             }
+        //         }
+        //     ]
         // },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
@@ -174,20 +159,16 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
-                //"[resourceId('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
                     {
                         "name": "ipconfig1",
                         "properties": {
-                        "subnet": {
-                            "id": "[variables('subnetRef')]"
-                        },
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
                             "privateIPAllocationMethod": "Dynamic"
-                            // "publicIpAddress": {
-                            //     "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
-                            // }
                         }
                     }
                 ],
