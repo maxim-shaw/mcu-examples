@@ -55,7 +55,7 @@
         "type": "string",
         "defaultValue": "databaseSubnet",
             "metadata": {
-                "description": "Subnet 1 Name"
+                "description": "A subnet for the database VM deployment"
             }
         }
     },
