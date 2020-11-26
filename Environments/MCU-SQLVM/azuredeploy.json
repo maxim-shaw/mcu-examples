@@ -81,7 +81,7 @@
             }
         ],
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-        "subnetRef": ["/subscriptions/93715f7a-35d5-4271-8ec0-197254b8617c/resourceGroups/ADASTRA-MCU-CANADA-RG/providers/Microsoft.Network/virtualNetworks/VNET-AZ1-CC-DEVQA-OLBZONE-1Q"]
+        "subnetRef": "/subscriptions/93715f7a-35d5-4271-8ec0-197254b8617c/resourceGroups/ADASTRA-MCU-CANADA-RG/providers/Microsoft.Network/virtualNetworks/VNET-AZ1-CC-DEVQA-OLBZONE-1Q"
         //"subnetRef": "[resourceId('Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
         //"subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
