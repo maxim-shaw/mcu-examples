@@ -110,39 +110,10 @@
             }
         ],
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-        "subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
+        //"subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
-        // {
-        //     "type": "Microsoft.Network/virtualNetworks",
-        //     "apiVersion": "2020-05-01",
-        //     "name": "[parameters('Existing Virtual Network Name')]",
-        //     "location": "[resourceGroup().location]",
-        //     "properties": {
-        //         "addressSpace": {
-        //             "addressPrefixes": [
-        //                 "[parameters('vnetAddressPrefix')]"
-        //             ]
-        //         }
-        //     },
-        //     "resources": [
-        //         {
-        //             "type": "subnets",
-        //             "apiVersion": "2020-05-01",
-        //             "location": "[resourceGroup().location]",
-        //             "name": "[parameters('Subnet Name')]",
-        //             "dependsOn": [
-        //                 "[parameters('Virtual Network Name')]"
-        //             ],
-        //             "properties": {
-        //                 "addressPrefix": "[parameters('Subnet Prefix')]",
-        //                 "networkSecurityGroup": {
-        //                     "id": "[variables('nsgId')]"
-        //                 }                        
-        //             }
-        //         }
-        //     ]
-        // },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-06-01",
