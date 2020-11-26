@@ -136,10 +136,10 @@
                     {
                         "name": "ipconfig1",
                         "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('subnetRef')]"
-                            },
-                            "privateIPAllocationMethod": "Dynamic"
+                            }
                         }
                     }
                 ],
