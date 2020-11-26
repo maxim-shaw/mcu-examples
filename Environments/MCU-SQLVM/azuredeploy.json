@@ -44,28 +44,6 @@
                 "description": "Size of database server VM"
             }
         },
-        // "Virtual Network Name": {
-        //     "type": "String",
-        //     "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
-        //     "metadata": {
-        //         "description": "Specify the name of the Subnet Name"
-        //     }
-
-        // },
-        // "Subnet Name": {
-        //     "type": "String",
-        //     "defaultValue": "databaseSubnet",
-        //     "metadata": {
-        //         "description": "Specify the name of the Subnet Name"
-        //     }
-        // },
-        // "vnetAddressPrefix": {
-        // "type": "string",
-        // "defaultValue": "10.0.0.0/16",
-        //     "metadata": {
-        //         "description": "Address prefix"
-        //     }
-        // },
         "Existing Virtual Network Name": {
             "type": "String",
             "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
@@ -79,14 +57,7 @@
             "metadata": {
                 "description": "Subnet 1 Name"
             }
-        }//,
-        // "Subnet Prefix": {
-        // "type": "string",
-        // "defaultValue": "10.0.0.0/24",
-        //     "metadata": {
-        //         "description": "Subnet Prefix"
-        //     }
-        // }
+        }
     },
     "variables": {
         "resourceNamePrefix": "AZ1",
