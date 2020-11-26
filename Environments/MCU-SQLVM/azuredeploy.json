@@ -81,7 +81,7 @@
             }
         ],
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-        "subnetRef": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
         //"subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
