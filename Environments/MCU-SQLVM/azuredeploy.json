@@ -4,6 +4,7 @@
     "parameters": {
         "Environment Number": {
             "type": "int",
+            "maxLength": 3,
             "metadata": {
                 "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
             }
@@ -82,9 +83,6 @@
         ],
         "gatewayVNetResourceGroup": "ADASTRA-MCU-CANADA-RG",
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-        //"subnetRef": "/subscriptions/93715f7a-35d5-4271-8ec0-197254b8617c/resourceGroups/ADASTRA-MCU-CANADA-RG/providers/Microsoft.Network/virtualNetworks/VNET-AZ1-CC-DEVQA-OLBZONE-1Q"
-        //"subnetRef": "[resourceId('Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
-        //"subnetref": "[concat(subscription().id, '/resourceGroups/', parameters('HUB Network RG'), '/providers/Microsoft.Network/virtualNetworks/', parameters('HUB VNet'), '/virtualNetworks/subnets/', parameters('HUB DC Subnet'))]"
         "subnetRef": "[resourceId(variables('gatewayVNetResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
@@ -191,18 +189,11 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            //"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
                         }
                     ]
                 }
             }
         }
-    ],
-    "outputs": {
-        "subnetRef": {
-            "type": "string",
-            "value": "[variables('subnetRef')]"
-        }
-    }
+    ]
 }
