@@ -12,13 +12,13 @@
         "VM Administrator Login": {
             "type": "string",
             "metadata": {
-                "description": "Database administrator login name"
+                "description": "Login name for deployed VMs"
             }
         },
         "VM Administrator Password": {
             "type": "securestring",
             "metadata": {
-                "description": "Database administrator password"
+                "description": "Password for deployed VMs"
             }
         },
         "Application VM Size": {
@@ -53,8 +53,8 @@
             }
         },
         "Subnet Name": {
-        "type": "string",
-        "defaultValue": "databaseSubnet",
+            "type": "string",
+            "defaultValue": "labSubnet",
             "metadata": {
                 "description": "A subnet for the database VM deployment"
             }
@@ -64,6 +64,7 @@
         "resourceNamePrefix": "AZ1",
         "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
         "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
+        "appVmName": "[concat(variables('resourceNamePrefix'), 'ASD', parameters('Environment Number'))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
         "networkSecurityGroupRules": [
@@ -156,7 +157,6 @@
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "microsoftsqlserver",
-                        //"offer": "sql2019-ws2019",
                         "offer": "SQL2016SP2-WS2016",
                         "sku": "sqldev",
                         "version": "latest"
