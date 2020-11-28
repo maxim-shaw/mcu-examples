@@ -137,6 +137,7 @@
                 "diskSizeGB": 1024
             }
         },
+        // 2016SP2 SQL database with Windows Server 2016 image VM   
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
@@ -184,7 +185,6 @@
                         "provisionVMAgent": true,
                         "enableAutomaticUpdates": true
                     },
-                    //"secrets": "[]",
                     "allowExtensionOperations": true
                 },
                 "networkProfile": {
@@ -195,6 +195,21 @@
                     ]
                 }
             }
-        }
+        }//,
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines",
+        //     "apiVersion": "2019-07-01",
+        //     "name": "[variables('appVmName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+        //     ],
+        //     "tags": {
+        //         "env": "DevTestLabs",
+        //         "ClientName": "MCU"
+        //     },
+        //     "properties": {
+        //     }
+        // }
     ]
 }
