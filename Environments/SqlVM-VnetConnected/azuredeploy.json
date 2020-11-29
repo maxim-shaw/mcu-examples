@@ -1,0 +1,198 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Environment Number": {
+            "type": "int",
+            "metadata": {
+                "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
+            }
+        },
+        "VM Administrator Login": {
+            "type": "string",
+            "metadata": {
+                "description": "Database administrator login name"
+            }
+        },
+        "VM Administrator Password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Database administrator password"
+            }
+        },
+        "Application VM Size": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "allowedValues": [
+                "Standard_B2ms",
+                "Standard_B2s",
+                "Standard_B4ms"
+            ],
+            "metadata": {
+                "description": "Size of application server VM"
+            }
+        },
+        "Database VM Size": {
+            "type": "string",
+            "defaultValue": "Standard_B4ms",
+            "allowedValues": [
+                "Standard_B2ms",
+                "Standard_B2s",
+                "Standard_B4ms"
+            ],
+            "metadata": {
+                "description": "Size of database server VM"
+            }
+        },
+        "Existing Virtual Network Name": {
+            "type": "String",
+            "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
+            "metadata": {
+                "description": "Specify the resrouce group of the existing VNet"
+            }
+        },
+        "Subnet Name": {
+        "type": "string",
+        "defaultValue": "databaseSubnet",
+            "metadata": {
+                "description": "A subnet for the database VM deployment"
+            }
+        }
+    },
+    "variables": {
+        "resourceNamePrefix": "AZ1",
+        "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
+        "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
+        "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
+        "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
+        "networkSecurityGroupRules": [
+            {
+                "name": "RDP",
+                "properties": {
+                    "priority": 300,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "3389"
+                }
+            }
+        ],
+        "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "subnetRef": "[resourceId('Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
+        //"subnetRef": "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetWorks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('networkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": "[variables('networkSecurityGroupRules')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('networkInterfaceName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": false,
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgId')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2017-03-30",
+            "name": "[variables('databaseDataDisk')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1024
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('databaseVmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "tags": {
+                "env": "DevTestLabs",
+                "ClientName": "MCU"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('Database VM Size')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "microsoftsqlserver",
+                        "offer": "sql2019-ws2019",
+                        "sku": "sqldev",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[variables('databaseDataDisk')]",
+                            "createOption": "attach",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('databaseVmName')]",
+                    "adminUsername": "[parameters('VM Administrator Login')]",
+                    "adminPassword": "[parameters('VM Administrator Password')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    //"secrets": "[]",
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

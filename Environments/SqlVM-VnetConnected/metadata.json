@@ -1,0 +1,6 @@
+{
+  "itemDisplayName": "Meridian CU - SQL VM VNet connected",
+  "description": "This template creates an Azure Web App with Azure SQL Database.",
+  "githubUsername": "Meridian Adastra PoC",
+  "summary": "Deploys an Azure Web App with a SQL database as an environment in a DevTest Lab for MCU PoC."
+}
