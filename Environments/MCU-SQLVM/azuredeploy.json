@@ -54,7 +54,8 @@
         },
         "Subnet Name": {
             "type": "string",
-            "defaultValue": "labSubnet",
+            //"defaultValue": "labSubnet",
+            "defaultValue": "databaseSubnet",
             "metadata": {
                 "description": "A subnet for the database VM deployment"
             }
@@ -84,6 +85,7 @@
         ],
         "gatewayVNetResourceGroup": "ADASTRA-MCU-CANADA-RG",
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        // Add Vnet/Subnet to allowed networks in the labs configuration
         "subnetRef": "[resourceId(variables('gatewayVNetResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
@@ -158,8 +160,8 @@
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "microsoftsqlserver",
-                        "offer": "SQL2016SP2-WS2016",
-                        //"offer": "sql2019-ws2019",
+                        //"offer": "SQL2016SP2-WS2016",
+                        "offer": "sql2019-ws2019",
                         "sku": "sqldev",
                         "version": "latest"
                     },
