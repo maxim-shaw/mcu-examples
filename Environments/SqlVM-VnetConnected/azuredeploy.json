@@ -94,48 +94,48 @@
             "properties": {
                 "securityRules": "[variables('networkSecurityGroupRules')]"
             }
-        },
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2020-06-01",
-            "name": "[variables('networkInterfaceName')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "subnet": {
-                                "id": "[variables('subnetRef')]"
-                            }
-                        }
-                    }
-                ],
-                "enableAcceleratedNetworking": false,
-                "networkSecurityGroup": {
-                    "id": "[variables('nsgId')]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Compute/disks",
-            "apiVersion": "2019-07-01",
-            "name": "[variables('databaseDataDisk')]",
-            "location": "[resourceGroup().location]",
-            "sku": {
-                "name": "Standard_LRS"
-            },
-            "properties": {
-                "creationData": {
-                    "createOption": "Empty"
-                },
-                "diskSizeGB": 1024
-            }
         }//,
+        // {
+        //     "type": "Microsoft.Network/networkInterfaces",
+        //     "apiVersion": "2020-06-01",
+        //     "name": "[variables('networkInterfaceName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+        //     ],
+        //     "properties": {
+        //         "ipConfigurations": [
+        //             {
+        //                 "name": "ipconfig1",
+        //                 "properties": {
+        //                     "privateIPAllocationMethod": "Dynamic",
+        //                     "subnet": {
+        //                         "id": "[variables('subnetRef')]"
+        //                     }
+        //                 }
+        //             }
+        //         ],
+        //         "enableAcceleratedNetworking": false,
+        //         "networkSecurityGroup": {
+        //             "id": "[variables('nsgId')]"
+        //         }
+        //     }
+        // },
+        // {
+        //     "type": "Microsoft.Compute/disks",
+        //     "apiVersion": "2019-07-01",
+        //     "name": "[variables('databaseDataDisk')]",
+        //     "location": "[resourceGroup().location]",
+        //     "sku": {
+        //         "name": "Standard_LRS"
+        //     },
+        //     "properties": {
+        //         "creationData": {
+        //             "createOption": "Empty"
+        //         },
+        //         "diskSizeGB": 1024
+        //     }
+        // }//,
         // {
         //     "type": "Microsoft.Compute/virtualMachines",
         //     "apiVersion": "2019-07-01",
