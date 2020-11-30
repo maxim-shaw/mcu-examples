@@ -123,7 +123,7 @@
         },
         {
             "type": "Microsoft.Compute/disks",
-            "apiVersion": "2017-03-30",
+            "apiVersion": "2019-07-01",
             "name": "[variables('databaseDataDisk')]",
             "location": "[resourceGroup().location]",
             "sku": {
@@ -135,65 +135,65 @@
                 },
                 "diskSizeGB": 1024
             }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-07-01",
-            "name": "[variables('databaseVmName')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]",
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
-            ],
-            "tags": {
-                "env": "DevTestLabs",
-                "ClientName": "MCU"
-            },
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('Database VM Size')]"
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "microsoftsqlserver",
-                        "offer": "sql2019-ws2019",
-                        "sku": "sqldev",
-                        "version": "latest"
-                    },
-                    "osDisk": {
-                        "createOption": "FromImage",
-                        "diskSizeGB": 127
-                    },
-                    "dataDisks": [
-                        {
-                            "lun": 0,
-                            "name": "[variables('databaseDataDisk')]",
-                            "createOption": "attach",
-                            "managedDisk": {
-                                "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
-                            }
-                        }
-                    ]
-                },
-                "osProfile": {
-                    "computerName": "[variables('databaseVmName')]",
-                    "adminUsername": "[parameters('VM Administrator Login')]",
-                    "adminPassword": "[parameters('VM Administrator Password')]",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true
-                    },
-                    //"secrets": "[]",
-                    "allowExtensionOperations": true
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
-                        }
-                    ]
-                }
-            }
-        }
+        }//,
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines",
+        //     "apiVersion": "2019-07-01",
+        //     "name": "[variables('databaseVmName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]",
+        //         "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+        //     ],
+        //     "tags": {
+        //         "env": "DevTestLabs",
+        //         "ClientName": "MCU"
+        //     },
+        //     "properties": {
+        //         "hardwareProfile": {
+        //             "vmSize": "[parameters('Database VM Size')]"
+        //         },
+        //         "storageProfile": {
+        //             "imageReference": {
+        //                 "publisher": "microsoftsqlserver",
+        //                 "offer": "sql2019-ws2019",
+        //                 "sku": "sqldev",
+        //                 "version": "latest"
+        //             },
+        //             "osDisk": {
+        //                 "createOption": "FromImage",
+        //                 "diskSizeGB": 127
+        //             },
+        //             "dataDisks": [
+        //                 {
+        //                     "lun": 0,
+        //                     "name": "[variables('databaseDataDisk')]",
+        //                     "createOption": "attach",
+        //                     "managedDisk": {
+        //                         "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
+        //                     }
+        //                 }
+        //             ]
+        //         },
+        //         "osProfile": {
+        //             "computerName": "[variables('databaseVmName')]",
+        //             "adminUsername": "[parameters('VM Administrator Login')]",
+        //             "adminPassword": "[parameters('VM Administrator Password')]",
+        //             "windowsConfiguration": {
+        //                 "provisionVMAgent": true,
+        //                 "enableAutomaticUpdates": true
+        //             },
+        //             //"secrets": "[]",
+        //             "allowExtensionOperations": true
+        //         },
+        //         "networkProfile": {
+        //             "networkInterfaces": [
+        //                 {
+        //                     "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+        //                 }
+        //             ]
+        //         }
+        //     }
+        // }
     ]
 }
