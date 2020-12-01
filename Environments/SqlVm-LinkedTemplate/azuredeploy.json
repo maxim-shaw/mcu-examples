@@ -230,42 +230,42 @@
                     "id": "[variables('nsgId')]"
                 }
             }
-        },
+        }//,
         // AppVM Virtual Machine
-        {
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2019-07-01",
-            "name": "[variables('appVmName')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
-            ],
-            "tags": {
-                "env": "DevTestLabs",
-                "ClientName": "MCU"
-            },
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('Application VM Size')]"
-                },
-                "osProfile": {
-                    "computerName": "[variables('appVmName')]",
-                    "adminUsername": "[parameters('VM Administrator Login')]",
-                    "adminPassword": "[parameters('VM Administrator Password')]"
-                },
-                 "storageProfile": {
-                    "imageReference": {
-                        "id": "[variables('appVmImage')]" // "[resourceId('Microsoft.Compute/galleries/images/versions', parameters('galleryName'), parameters('galleryImageDefinitionName'), parameters('galleryImageVersionName'))]"
-                    }
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
-                        }
-                    ]
-                }
-            }
-        }
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines",
+        //     "apiVersion": "2019-07-01",
+        //     "name": "[variables('appVmName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
+        //     ],
+        //     "tags": {
+        //         "env": "DevTestLabs",
+        //         "ClientName": "MCU"
+        //     },
+        //     "properties": {
+        //         "hardwareProfile": {
+        //             "vmSize": "[parameters('Application VM Size')]"
+        //         },
+        //         "osProfile": {
+        //             "computerName": "[variables('appVmName')]",
+        //             "adminUsername": "[parameters('VM Administrator Login')]",
+        //             "adminPassword": "[parameters('VM Administrator Password')]"
+        //         },
+        //          "storageProfile": {
+        //             "imageReference": {
+        //                 "id": "[variables('appVmImage')]" // "[resourceId('Microsoft.Compute/galleries/images/versions', parameters('galleryName'), parameters('galleryImageDefinitionName'), parameters('galleryImageVersionName'))]"
+        //             }
+        //         },
+        //         "networkProfile": {
+        //             "networkInterfaces": [
+        //                 {
+        //                     "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
+        //                 }
+        //             ]
+        //         }
+        //     }
+        // }
     ]
 }
