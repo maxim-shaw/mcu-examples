@@ -67,7 +67,7 @@
         "appNetworkInterfaceName": "[concat(variables('appVmName'), '-nic')]",
         "sigName": "McuAppImages",
         "sigImageDefinition": "myImageDefinition",
-        "sigImageVersion": "1.0.0",
+        "sigImageVersion": "1.0.1",
         "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
