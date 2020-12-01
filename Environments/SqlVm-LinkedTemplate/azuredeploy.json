@@ -63,6 +63,12 @@
         "resourceNamePrefix": "AZ1",
         "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
         "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
+        "appVmName": "[concat(variables('resourceNamePrefix'), 'ASD', parameters('Environment Number'))]",
+        "appNetworkInterfaceName": "[concat(variables('appVmName'), '-nic')]",
+        "sigName": "McuAppImages",
+        "sigImageDefinition": "myImageDefinition",
+        "sigImageVersion": "1.0.0",
+        "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
         "networkSecurityGroupRules": [
@@ -85,6 +91,7 @@
         "subnetRef": "[resourceId(variables('gatewayVNetResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
+        // SQL Network Security Group
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-03-01",
@@ -94,6 +101,7 @@
                 "securityRules": "[variables('networkSecurityGroupRules')]"
             }
         },
+        // SQL Network Interface (NIC) 
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-03-01",
@@ -120,6 +128,7 @@
                 }
             }
         },
+        // SQL Data Disk
         {
             "type": "Microsoft.Compute/disks",
             "apiVersion": "2019-07-01",
@@ -135,6 +144,7 @@
                 "diskSizeGB": 1024
             }
         },
+        // SQL Virtual Machine
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2019-07-01",
@@ -189,6 +199,69 @@
                     "networkInterfaces": [
                         {
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        // AppVM Network Interface (NIC)
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('appNetworkInterfaceName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": false,
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgId')]"
+                }
+            }
+        },
+        // AppVM Virtual Machine
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('appVmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
+            ],
+            "tags": {
+                "env": "DevTestLabs",
+                "ClientName": "MCU"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('Application VM Size')]"
+                },
+                "osProfile": {
+                    "computerName": "[variables('appVmName')]",
+                    "adminUsername": "[parameters('VM Administrator Login')]",
+                    "adminPassword": "[parameters('VM Administrator Password')]"
+                },
+                 "storageProfile": {
+                    "imageReference": {
+                        "id": "[variables('appVmImage')]" // "[resourceId('Microsoft.Compute/galleries/images/versions', parameters('galleryName'), parameters('galleryImageDefinitionName'), parameters('galleryImageVersionName'))]"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
                         }
                     ]
                 }
