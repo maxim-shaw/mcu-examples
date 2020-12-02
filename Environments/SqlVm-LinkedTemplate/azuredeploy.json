@@ -57,6 +57,18 @@
             "metadata": {
                 "description": "A subnet for the database VM deployment"
             }
+        },
+        "Domain Admin User": {
+            "type": "string",
+            "metadata": {
+                "description": "Domain administrator login name"
+            }
+        },
+        "Domain Admin Password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Domain administrator password"
+            }
         }
     },
     "variables": {
@@ -130,8 +142,9 @@
                 } 
             }
         ],
-        "domainToJoin": "meridiancu.onmicrosoft.com",
-        "ouPath": "",
+
+        "domainToJoin": "meridiancu.com",
+        "ouPath": "OU=servers,DC=meridiancu,DC=com",
         "gatewayVNetResourceGroup": "ADASTRA-MCU-CANADA-RG",
         "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
         "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
@@ -212,7 +225,8 @@
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "microsoftsqlserver",
-                        "offer": "sql2019-ws2019",
+                        //"offer": "sql2019-ws2019",
+                        "offer": "SQL2016SP2-WS2016",
                         "sku": "sqldev",
                         "version": "latest"
                     },
@@ -252,31 +266,31 @@
             }
         },
         // SQL VM Domain joining
-        {
-            "apiVersion": "2015-06-15",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('databaseVmName'),'/joindomain')]", //parameters('dnsLabelPrefix')
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('databaseVmName'))]" //
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "JsonADDomainExtension",
-                "typeHandlerVersion": "1.3",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "Name": "[variables('domainToJoin')]",
-                    "OUPath": "[parameters('ouPath')]",
-                    "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUsername'))]",
-                    "Restart": "true",
-                    "Options": "[parameters('domainJoinOptions')]"
-                },
-                "protectedSettings": {
-                "Password": "[parameters('domainPassword')]"
-                }
-            }
-        },
+        // {
+        //     "apiVersion": "2015-06-15",
+        //     "type": "Microsoft.Compute/virtualMachines/extensions",
+        //     "name": "[concat(variables('databaseVmName'),'/joindomain')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[concat('Microsoft.Compute/virtualMachines/', variables('databaseVmName'))]"
+        //     ],
+        //     "properties": {
+        //         "publisher": "Microsoft.Compute",
+        //         "type": "JsonADDomainExtension",
+        //         "typeHandlerVersion": "1.3",
+        //         "autoUpgradeMinorVersion": true,
+        //         "settings": {
+        //             "Name": "[variables('domainToJoin')]",
+        //             "OUPath": "[variables('ouPath')]",
+        //             "User": "[concat(variables('domainToJoin'), '\\', parameters('Domain Admin Password'))]",
+        //             "Restart": "true",
+        //             "Options": "3" // Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
+        //         },
+        //         "protectedSettings": {
+        //         "Password": "[parameters('Domain Admin Password')]"
+        //         }
+        //     }
+        // },
         // App Network Security Group
         {
             "type": "Microsoft.Network/networkSecurityGroups",
