@@ -70,10 +70,11 @@
         "sigImageVersion": "1.0.1",
         "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
-        "networkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
-        "networkSecurityGroupRules": [
+        "sqlNetworkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
+        "appNetworkSecurityGroupName": "[concat(variables('appVmName'), '-nsg')]",
+        "sqlNetworkSecurityGroupRules": [
             {
-                "name": "RDP",
+                "name": "AllowRDP",
                 "properties": {
                     "priority": 300,
                     "protocol": "TCP",
@@ -84,10 +85,54 @@
                     "destinationAddressPrefix": "*",
                     "destinationPortRange": "3389"
                 }
+            },
+            {
+                "name": "AllowSQLDbPort",
+                "properties": {
+                    "priority": 310,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    // For secure access source and destination addresses may be explicit
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "1433"
+                } 
+            }
+        ],
+        "appNetworkSecurityGroupRules": [
+            {
+                "name": "AllowRDP",
+                "properties": {
+                    "priority": 300,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "3389"
+                }
+            },
+            {
+                "name": "AllowHttp",
+                "properties": {
+                    "priority": 310,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    // For secure access source and destination addresses may be explicit
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "80,443"
+                } 
             }
         ],
         "gatewayVNetResourceGroup": "ADASTRA-MCU-CANADA-RG",
-        "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
+        "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
         "subnetRef": "[resourceId(variables('gatewayVNetResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
@@ -95,10 +140,10 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-03-01",
-            "name": "[variables('networkSecurityGroupName')]",
+            "name": "[variables('sqlNetworkSecurityGroupName')]",
             "location": "[resourceGroup().location]",
             "properties": {
-                "securityRules": "[variables('networkSecurityGroupRules')]"
+                "securityRules": "[variables('sqlNetworkSecurityGroupRules')]"
             }
         },
         // SQL Network Interface (NIC) 
@@ -108,7 +153,7 @@
             "name": "[variables('networkInterfaceName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('sqlNetworkSecurityGroupName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -124,7 +169,7 @@
                 ],
                 "enableAcceleratedNetworking": false,
                 "networkSecurityGroup": {
-                    "id": "[variables('nsgId')]"
+                    "id": "[variables('sqlNsgId')]"
                 }
             }
         },
@@ -204,6 +249,16 @@
                 }
             }
         },
+        // App Network Security Group
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('appNetworkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": "[variables('appNetworkSecurityGroupRules')]"
+            }
+        },
         // AppVM Network Interface (NIC)
         {
             "type": "Microsoft.Network/networkInterfaces",
@@ -211,7 +266,7 @@
             "name": "[variables('appNetworkInterfaceName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('appNetworkSecurityGroupName'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -227,7 +282,7 @@
                 ],
                 "enableAcceleratedNetworking": false,
                 "networkSecurityGroup": {
-                    "id": "[variables('nsgId')]"
+                    "id": "[variables('appNsgId')]"
                 }
             }
         },
@@ -248,14 +303,9 @@
                 "hardwareProfile": {
                     "vmSize": "[parameters('Application VM Size')]"
                 },
-                // "osProfile": {
-                //     "computerName": "[variables('appVmName')]",
-                //     "adminUsername": "[parameters('VM Administrator Login')]",
-                //     "adminPassword": "[parameters('VM Administrator Password')]"
-                // },
                  "storageProfile": {
                     "imageReference": {
-                        "id": "[variables('appVmImage')]" // "[resourceId('Microsoft.Compute/galleries/images/versions', parameters('galleryName'), parameters('galleryImageDefinitionName'), parameters('galleryImageVersionName'))]"
+                        "id": "[variables('appVmImage')]"
                     }
                 },
                 "networkProfile": {
