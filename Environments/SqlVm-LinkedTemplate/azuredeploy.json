@@ -130,6 +130,8 @@
                 } 
             }
         ],
+        "domainToJoin": "meridiancu.onmicrosoft.com",
+        "ouPath": "",
         "gatewayVNetResourceGroup": "ADASTRA-MCU-CANADA-RG",
         "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
         "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
@@ -264,7 +266,7 @@
                 "typeHandlerVersion": "1.3",
                 "autoUpgradeMinorVersion": true,
                 "settings": {
-                    "Name": "[parameters('domainToJoin')]",
+                    "Name": "[variables('domainToJoin')]",
                     "OUPath": "[parameters('ouPath')]",
                     "User": "[concat(parameters('domainToJoin'), '\\', parameters('domainUsername'))]",
                     "Restart": "true",
