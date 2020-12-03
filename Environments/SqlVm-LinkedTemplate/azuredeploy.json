@@ -59,18 +59,28 @@
                 "description": "A subnet for the database VM deployment"
             }
         },
-        "Domain Admin User": {
+        "Resource Group Name": {
             "type": "string",
+            "defaultValue": "RG-VNET-AZ1-VV-DEVQA-OLBZONE",
+            "allowedValues": [
+                "ADASTRA-MCU-CANADA-RG"
+            ],
             "metadata": {
-                "description": "Domain administrator login name"
-            }
-        },
-        "Domain Admin Password": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Domain administrator password"
+                "description": "Size of database server VM"
             }
         }
+        // "Domain Admin User": {
+        //     "type": "string",
+        //     "metadata": {
+        //         "description": "Domain administrator login name"
+        //     }
+        // },
+        // "Domain Admin Password": {
+        //     "type": "securestring",
+        //     "metadata": {
+        //         "description": "Domain administrator password"
+        //     }
+        // }
     },
     "variables": {
         "resourceNamePrefix": "AZ1",
@@ -148,7 +158,7 @@
         "resourceGroupName": "ADASTRA-MCU-CANADA-RG",
         "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
         "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
-        "subnetRef": "[resourceId(variables('resourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]",
+        "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]",
         "setupChocolateyScriptLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/visual-studio-dev-vm-chocolatey/scripts/",
         "setupChocolateyScriptFileName": "SetupChocolatey.ps1",
         "chocoPackages": "dotnet4.5.2"
@@ -293,33 +303,33 @@
         //         }
         //     }
         // },
-        {
-            "name": "SetupChocolatey",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "location": "[resourceGroup().location]",
-            "apiVersion": "2018-06-01",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
-            ],
-            "tags": {
-                "displayName": "SetupChocolatey"
-            },
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.10",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
-                    ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                },
-                "protectedSettings": {
-                //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                }
-            }
-        },
+        // {
+        //     "name": "SetupChocolatey",
+        //     "type": "Microsoft.Compute/virtualMachines/extensions",
+        //     "location": "[resourceGroup().location]",
+        //     "apiVersion": "2018-06-01",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
+        //     ],
+        //     "tags": {
+        //         "displayName": "SetupChocolatey"
+        //     },
+        //     "properties": {
+        //         "publisher": "Microsoft.Compute",
+        //         "type": "CustomScriptExtension",
+        //         "typeHandlerVersion": "1.10",
+        //         "autoUpgradeMinorVersion": true,
+        //         "settings": {
+        //             "fileUris": [
+        //                 "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
+        //             ],
+        //             "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
+        //         },
+        //         "protectedSettings": {
+        //         //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
+        //         }
+        //     }
+        // },
         // SQL VM Domain joining
         // {
         //     "apiVersion": "2015-06-15",
