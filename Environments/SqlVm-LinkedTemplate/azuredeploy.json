@@ -142,13 +142,12 @@
                 } 
             }
         ],
-
         "domainToJoin": "meridiancu.com",
         "ouPath": "OU=servers,DC=meridiancu,DC=com",
-        "gatewayVNetResourceGroup": "ADASTRA-MCU-CANADA-RG",
+        "resourceGroupName": "ADASTRA-MCU-CANADA-RG",
         "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
         "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
-        "subnetRef": "[resourceId(variables('gatewayVNetResourceGroup'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
+        "subnetRef": "[resourceId(variables('resourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
         // SQL Network Security Group
