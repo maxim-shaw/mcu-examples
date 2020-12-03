@@ -1,0 +1,449 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Environment Number": {
+            "type": "int",
+            //"maxLength": 3,
+            "metadata": {
+                "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
+            }
+        },
+        "VM Administrator Login": {
+            "type": "string",
+            "metadata": {
+                "description": "Database administrator login name"
+            }
+        },
+        "VM Administrator Password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Database administrator password"
+            }
+        },
+        "Application VM Size": {
+            "type": "string",
+            "defaultValue": "Standard_B2ms",
+            "allowedValues": [
+                "Standard_B2ms",
+                "Standard_B2s",
+                "Standard_B4ms"
+            ],
+            "metadata": {
+                "description": "Size of application server VM"
+            }
+        },
+        "Database VM Size": {
+            "type": "string",
+            "defaultValue": "Standard_B4ms",
+            "allowedValues": [
+                "Standard_B2ms",
+                "Standard_B2s",
+                "Standard_B4ms"
+            ],
+            "metadata": {
+                "description": "Size of database server VM"
+            }
+        },
+        "Existing Virtual Network Name": {
+            "type": "String",
+            "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
+            "metadata": {
+                "description": "Specify the resrouce group of the existing VNet"
+            }
+        },
+        "Subnet Name": {
+        "type": "string",
+        "defaultValue": "databaseSubnet",
+            "metadata": {
+                "description": "A subnet for the database VM deployment"
+            }
+        },
+        "Resource Group Name": {
+            "type": "string",
+            "defaultValue": "RG-VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
+            "allowedValues": [
+                "ADASTRA-MCU-CANADA-RG",
+                "RG-VNET-AZ1-CC-DEVQA-OLBZONE-1Q"
+            ],
+            "metadata": {
+                "description": "Size of database server VM"
+            }
+        }
+        // "Domain Admin User": {
+        //     "type": "string",
+        //     "metadata": {
+        //         "description": "Domain administrator login name"
+        //     }
+        // },
+        // "Domain Admin Password": {
+        //     "type": "securestring",
+        //     "metadata": {
+        //         "description": "Domain administrator password"
+        //     }
+        // }
+    },
+    "variables": {
+        "resourceNamePrefix": "AZ1",
+        "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
+        "databaseDataDisk": "[concat(variables('databaseVmName'), '_OsDisk_1_', take(uniqueString(resourceGroup().id),12))]",
+        "appVmName": "[concat(variables('resourceNamePrefix'), 'ASD', parameters('Environment Number'))]",
+        "appNetworkInterfaceName": "[concat(variables('appVmName'), '-nic')]",
+        "sigName": "McuAppImages",
+        "sigImageDefinition": "McuWindowsAppImgDef",
+        "sigImageVersion": "1.0.0",
+        "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
+        "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
+        "sqlNetworkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
+        "appNetworkSecurityGroupName": "[concat(variables('appVmName'), '-nsg')]",
+        "sqlNetworkSecurityGroupRules": [
+            {
+                "name": "AllowRDP",
+                "properties": {
+                    "priority": 300,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "3389"
+                }
+            },
+            {
+                "name": "AllowSQLDbPort",
+                "properties": {
+                    "priority": 310,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    // For secure access source and destination addresses may be explicit
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "1433"
+                } 
+            }
+        ],
+        "appNetworkSecurityGroupRules": [
+            {
+                "name": "AllowRDP",
+                "properties": {
+                    "priority": 300,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "3389"
+                }
+            },
+            {
+                "name": "AllowHttpInbound",
+                "properties": {
+                    "priority": 310,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    // For secure access source and destination addresses may be explicit
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRanges": ["80", "443"]
+                } 
+            }
+        ],
+        "domainToJoin": "meridiancu.com",
+        "ouPath": "OU=servers,DC=meridiancu,DC=com",
+        "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
+        "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
+        "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]",
+        "setupChocolateyScriptLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/visual-studio-dev-vm-chocolatey/scripts/",
+        "setupChocolateyScriptFileName": "SetupChocolatey.ps1",
+        "chocoPackages": "dotnet4.5.2"
+    },
+    "resources": [
+        // SQL Network Security Group
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('sqlNetworkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": "[variables('sqlNetworkSecurityGroupRules')]"
+            }
+        },
+        // SQL Network Interface (NIC) 
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('networkInterfaceName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('sqlNetworkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": false,
+                "networkSecurityGroup": {
+                    "id": "[variables('sqlNsgId')]"
+                }
+            }
+        },
+        // SQL Data Disk
+        {
+            "type": "Microsoft.Compute/disks",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('databaseDataDisk')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "creationData": {
+                    "createOption": "Empty"
+                },
+                "diskSizeGB": 1024
+            }
+        },
+        // SQL Virtual Machine
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('databaseVmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "tags": {
+                "env": "DevTestLabs",
+                "ClientName": "MCU"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('Database VM Size')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "microsoftsqlserver",
+                        "offer": "SQL2016SP2-WS2016",
+                        "sku": "sqldev",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "diskSizeGB": 127
+                    },
+                    "dataDisks": [
+                        {
+                            "lun": 0,
+                            "name": "[variables('databaseDataDisk')]",
+                            "createOption": "attach",
+                            "managedDisk": {
+                                "id": "[resourceId('Microsoft.Compute/disks/', variables('databaseDataDisk'))]"
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('databaseVmName')]",
+                    "adminUsername": "[parameters('VM Administrator Login')]",
+                    "adminPassword": "[parameters('VM Administrator Password')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    //"secrets": "[]",
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        // Setup Chocolatey (package management tool)
+        // {
+        //     "name": "SetupChocolatey",
+        //     "type": "extensions",
+        //     "location": "[resourceGroup().location]",
+        //     "apiVersion": "2015-06-15",
+        //     "dependsOn": [
+        //         "[concat('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
+        //     ],
+        //     "tags": {
+        //         "displayName": "SetupChocolatey"
+        //     },
+        //     "properties": {
+        //         "publisher": "Microsoft.Compute",
+        //         "type": "CustomScriptExtension",
+        //         "typeHandlerVersion": "1.9",
+        //         "autoUpgradeMinorVersion": true,
+        //         "settings": {
+        //             "fileUris": [
+        //                 "[concat(variables('setupChocolateyScriptLocation'),variables('setupChocolateyScriptFileName'))]"
+        //             ],
+        //             "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ',variables('chocoPackages'))]"
+        //         }
+        //     }
+        // },
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines/extensions",
+        //     "name": "SetupChocolatey",
+        //     "location": "[resourceGroup().location]",
+        //     "apiVersion": "2019-07-01",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
+        //     ],
+        //     "tags": {
+        //         "displayName": "SetupChocolatey"
+        //     },
+        //     "properties": {
+        //         "publisher": "Microsoft.Compute",
+        //         "type": "CustomScriptExtension",
+        //         "typeHandlerVersion": "1.10",
+        //         "autoUpgradeMinorVersion": true,
+        //         "settings": {
+        //             "fileUris": [
+        //                 "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
+        //             ],
+        //             "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
+        //         }//,
+        //         // "protectedSettings": {
+        //         // //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
+        //         // }
+        //     }
+        // },
+        // SQL VM Domain joining
+        // {
+        //     "apiVersion": "2015-06-15",
+        //     "type": "Microsoft.Compute/virtualMachines/extensions",
+        //     "name": "[concat(variables('databaseVmName'),'/joindomain')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[concat('Microsoft.Compute/virtualMachines/', variables('databaseVmName'))]"
+        //     ],
+        //     "properties": {
+        //         "publisher": "Microsoft.Compute",
+        //         "type": "JsonADDomainExtension",
+        //         "typeHandlerVersion": "1.3",
+        //         "autoUpgradeMinorVersion": true,
+        //         "settings": {
+        //             "Name": "[variables('domainToJoin')]",
+        //             "OUPath": "[variables('ouPath')]",
+        //             "User": "[concat(variables('domainToJoin'), '\\', parameters('Domain Admin Password'))]",
+        //             "Restart": "true",
+        //             "Options": "3" // Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
+        //         },
+        //         "protectedSettings": {
+        //         "Password": "[parameters('Domain Admin Password')]"
+        //         }
+        //     }
+        // },
+        // App Network Security Group
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('appNetworkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": "[variables('appNetworkSecurityGroupRules')]"
+            }
+        },
+        // AppVM Network Interface (NIC)
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('appNetworkInterfaceName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('appNetworkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": false,
+                "networkSecurityGroup": {
+                    "id": "[variables('appNsgId')]"
+                }
+            }
+        },
+        // AppVM Virtual Machine
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('appVmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
+            ],
+            "tags": {
+                "env": "DevTestLabs",
+                "ClientName": "MCU"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('Application VM Size')]"
+                },
+                 "storageProfile": {
+                    "imageReference": {
+                        "id": "[variables('appVmImage')]"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },// VM extentsion, Install WebServer
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-12-01",
+            "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion":true,
+                "settings": {
+                    // "fileUris": [
+                    //     "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
+                    // ],
+                    //"commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
+                    "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "Database VM Size": {
+            "type": "string",
+            "defaultValue": "Standard_B4ms",
+            "allowedValues": [
+                "Standard_B2ms",
+                "Standard_B2s",
+                "Standard_B4ms"
+            ],
+            "metadata": {
+                "description": "Size of database server VM"
+            }
+        }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-04-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('storageSKU')]"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true
+      }
+    }
+  ],
+  "outputs": {
+    "storageEndpoint": {
+      "type": "object",
+      "value": "[reference(parameters('storageAccountName')).primaryEndpoints]"
+    }
+  }
+}
