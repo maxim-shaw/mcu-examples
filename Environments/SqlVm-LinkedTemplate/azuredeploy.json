@@ -314,10 +314,10 @@
                         "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
                     ],
                     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                }//,
-                // "protectedSettings": {
+                },
+                "protectedSettings": {
                 //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                // }
+                }
             }
         },
         // SQL VM Domain joining
