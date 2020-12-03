@@ -156,7 +156,6 @@
         ],
         "domainToJoin": "meridiancu.com",
         "ouPath": "OU=servers,DC=meridiancu,DC=com",
-        "resourceGroupName": "ADASTRA-MCU-CANADA-RG",
         "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
         "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
         "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]",
@@ -345,11 +344,11 @@
                 "typeHandlerVersion": "1.7",
                 "autoUpgradeMinorVersion":true,
                 "settings": {
-                    "fileUris": [
-                        "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
-                    ],
-                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
-                    //"commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
+                    // "fileUris": [
+                    //     "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
+                    // ],
+                    //"commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
+                    "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
                 }
             }
         },
