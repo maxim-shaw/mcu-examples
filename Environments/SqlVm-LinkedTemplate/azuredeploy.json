@@ -308,7 +308,7 @@
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "SetupChocolatey",
             "location": "[resourceGroup().location]",
-            "apiVersion": "2018-06-01",
+            "apiVersion": "2019-07-01",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
             ],
@@ -325,10 +325,10 @@
                         "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
                     ],
                     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                },
-                "protectedSettings": {
-                //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                }
+                }//,
+                // "protectedSettings": {
+                // //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
+                // }
             }
         },
         // SQL VM Domain joining
