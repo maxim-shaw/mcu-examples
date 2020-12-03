@@ -418,6 +418,17 @@
                         "id": "[variables('appVmImage')]"
                     }
                 },
+                "osProfile": {
+                    "computerName": "[variables('appVmName')]",
+                    "adminUsername": "[parameters('VM Administrator Login')]",
+                    "adminPassword": "[parameters('VM Administrator Password')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    //"secrets": "[]",
+                    "allowExtensionOperations": true
+                },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
