@@ -63,7 +63,8 @@
             "type": "string",
             "defaultValue": "RG-VNET-AZ1-CC-DEVQA-OLBZONE",
             "allowedValues": [
-                "ADASTRA-MCU-CANADA-RG"
+                "ADASTRA-MCU-CANADA-RG",
+                "RG-VNET-AZ1-CC-DEVQA-OLBZONE"
             ],
             "metadata": {
                 "description": "Size of database server VM"
