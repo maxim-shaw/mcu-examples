@@ -303,8 +303,8 @@
         //     }
         // },
         {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "SetupChocolatey/extensions",
+            "type": "extensions",
+            "name": "SetupChocolatey",
             "location": "[resourceGroup().location]",
             "apiVersion": "2019-07-01",
             "dependsOn": [
