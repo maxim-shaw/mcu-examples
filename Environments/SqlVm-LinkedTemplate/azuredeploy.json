@@ -61,10 +61,10 @@
         },
         "Resource Group Name": {
             "type": "string",
-            "defaultValue": "RG-VNET-AZ1-CC-DEVQA-OLBZONE",
+            "defaultValue": "RG-VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
             "allowedValues": [
                 "ADASTRA-MCU-CANADA-RG",
-                "RG-VNET-AZ1-CC-DEVQA-OLBZONE"
+                "RG-VNET-AZ1-CC-DEVQA-OLBZONE-1Q"
             ],
             "metadata": {
                 "description": "Size of database server VM"
@@ -90,8 +90,8 @@
         "appVmName": "[concat(variables('resourceNamePrefix'), 'ASD', parameters('Environment Number'))]",
         "appNetworkInterfaceName": "[concat(variables('appVmName'), '-nic')]",
         "sigName": "McuAppImages",
-        "sigImageDefinition": "myImageDefinition",
-        "sigImageVersion": "1.0.1",
+        "sigImageDefinition": "McuWindowsAppImgDef",
+        "sigImageVersion": "1.0.0",
         "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "sqlNetworkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
@@ -238,7 +238,6 @@
                 "storageProfile": {
                     "imageReference": {
                         "publisher": "microsoftsqlserver",
-                        //"offer": "sql2019-ws2019",
                         "offer": "SQL2016SP2-WS2016",
                         "sku": "sqldev",
                         "version": "latest"
@@ -303,53 +302,31 @@
         //         }
         //     }
         // },
-        // {
-        //     "type": "Microsoft.Compute/virtualMachines/extensions",
-        //     "name": "SetupChocolatey",
-        //     "location": "[resourceGroup().location]",
-        //     "apiVersion": "2019-07-01",
-        //     "dependsOn": [
-        //         "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
-        //     ],
-        //     "tags": {
-        //         "displayName": "SetupChocolatey"
-        //     },
-        //     "properties": {
-        //         "publisher": "Microsoft.Compute",
-        //         "type": "CustomScriptExtension",
-        //         "typeHandlerVersion": "1.10",
-        //         "autoUpgradeMinorVersion": true,
-        //         "settings": {
-        //             "fileUris": [
-        //                 "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
-        //             ],
-        //             "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-        //         }//,
-        //         // "protectedSettings": {
-        //         // //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-        //         // }
-        //     }
-        // },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2019-12-01",
-            "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
+            "name": "SetupChocolatey",
             "location": "[resourceGroup().location]",
+            "apiVersion": "2019-07-01",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
+                "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
             ],
+            "tags": {
+                "displayName": "SetupChocolatey"
+            },
             "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.7",
-                "autoUpgradeMinorVersion":true,
+                "typeHandlerVersion": "1.10",
+                "autoUpgradeMinorVersion": true,
                 "settings": {
-                    // "fileUris": [
-                    //     "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
-                    // ],
-                    //"commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
-                    "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
-                }
+                    "fileUris": [
+                        "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
+                    ],
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
+                }//,
+                // "protectedSettings": {
+                // //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
+                // }
             }
         },
         // SQL VM Domain joining
@@ -443,6 +420,28 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
                         }
                     ]
+                }
+            }
+        },// VM extentsion, Install WebServer
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-12-01",
+            "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.7",
+                "autoUpgradeMinorVersion":true,
+                "settings": {
+                    // "fileUris": [
+                    //     "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
+                    // ],
+                    //"commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
+                    "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
                 }
             }
         }
