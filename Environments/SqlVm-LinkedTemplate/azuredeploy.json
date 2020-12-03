@@ -273,7 +273,7 @@
           "name": "SetupChocolatey",
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
+          "apiVersion": "2018-06-01",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
           ],
