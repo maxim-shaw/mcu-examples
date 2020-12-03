@@ -61,7 +61,7 @@
         },
         "Resource Group Name": {
             "type": "string",
-            "defaultValue": "RG-VNET-AZ1-VV-DEVQA-OLBZONE",
+            "defaultValue": "RG-VNET-AZ1-CC-DEVQA-OLBZONE",
             "allowedValues": [
                 "ADASTRA-MCU-CANADA-RG"
             ],
