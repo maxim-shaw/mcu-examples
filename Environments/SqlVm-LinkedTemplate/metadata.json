@@ -1,5 +1,5 @@
 {
-  "itemDisplayName": "DevTesLabs - SQL VM and App VM (perspective)",
+  "itemDisplayName": "DevTesLabs - SQL VM and App VM (perspective with choco)",
   "description": "This template creates an Azure Web App with Azure SQL Database.",
   "githubUsername": "MeridianCU PoC",
   "summary": "Deploys an Azure Web App with a SQL database as an environment in a DevTest Lab for MCU PoC."
