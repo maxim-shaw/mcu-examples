@@ -4,3 +4,6 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 // Install Chocolatey packages 
 choco install paint.net
 choco install notepadplusplus
+
+# Reboot
+//Restart-Computer

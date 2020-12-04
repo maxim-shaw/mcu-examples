@@ -439,7 +439,7 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-07-01",
-            "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
+            "name": "[concat(variables('appVmName'),'/', 'InstallChocolatery')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
@@ -447,14 +447,19 @@
             "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.7",
+                "typeHandlerVersion": "1.10",
                 "autoUpgradeMinorVersion":true,
                 "settings": {
-                    // "fileUris": [
-                    //     "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
-                    // ],
-                    //"commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
-                    "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/chocopackages.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File chocopackages.ps1"
+                },
+                 "protectedSettings": {
+                    "commandToExecute": "",
+                    "storageAccountName": "",
+                    "storageAccountKey": "",
+                    "managedIdentity" : {}
                 }
             }
         }
