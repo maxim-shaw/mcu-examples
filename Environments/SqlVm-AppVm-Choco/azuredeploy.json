@@ -452,11 +452,11 @@
                 "settings": {
                     "fileUris": [
                         "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/chocopackages.ps1"
-                    ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', './chocopackages.ps1')]"
+                    ]//,
+                    //"commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', './chocopackages.ps1')]"
                 },
                  "protectedSettings": {
-                    "commandToExecute": "",
+                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', './chocopackages.ps1')]",
                     "storageAccountName": "",
                     "storageAccountKey": "",
                     "managedIdentity" : {}
