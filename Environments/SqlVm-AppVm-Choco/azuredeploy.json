@@ -428,7 +428,7 @@
                 "settings": {
                     "fileUris": [
                         //"https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
-                        "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/visual-studio-dev-vm-chocolatey/scripts/postdeployment.ps1"
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/postdeployment.ps1"
                     ],
                     "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File postdeployment.ps1"
                     //"commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
