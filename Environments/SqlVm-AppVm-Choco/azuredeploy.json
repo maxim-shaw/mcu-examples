@@ -161,7 +161,7 @@
         "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]",
         "setupChocolateyScriptLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/visual-studio-dev-vm-chocolatey/scripts/",
         "setupChocolateyScriptFileName": "SetupChocolatey.ps1",
-        "chocoPackages": "dotnet4.5.2"
+        "chocoPackages": "paint.net;notepadplusplus" // List of Chocolatey packages to install separated by a semi-colon eg. linqpad;sysinternals
     },
     "resources": [
         // SQL Network Security Group
@@ -278,30 +278,6 @@
             }
         },
         // Setup Chocolatey (package management tool)
-        // {
-        //     "name": "SetupChocolatey",
-        //     "type": "extensions",
-        //     "location": "[resourceGroup().location]",
-        //     "apiVersion": "2015-06-15",
-        //     "dependsOn": [
-        //         "[concat('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
-        //     ],
-        //     "tags": {
-        //         "displayName": "SetupChocolatey"
-        //     },
-        //     "properties": {
-        //         "publisher": "Microsoft.Compute",
-        //         "type": "CustomScriptExtension",
-        //         "typeHandlerVersion": "1.9",
-        //         "autoUpgradeMinorVersion": true,
-        //         "settings": {
-        //             "fileUris": [
-        //                 "[concat(variables('setupChocolateyScriptLocation'),variables('setupChocolateyScriptFileName'))]"
-        //             ],
-        //             "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ',variables('chocoPackages'))]"
-        //         }
-        //     }
-        // },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('appVmName'),'/', 'SetupChocolatey')]",
