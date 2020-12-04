@@ -4,7 +4,6 @@
     "parameters": {
         "Environment Number": {
             "type": "int",
-            //"maxLength": 3,
             "metadata": {
                 "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
             }
@@ -277,36 +276,6 @@
                 }
             }
         },
-        // {
-        //     "type": "Microsoft.Compute/virtualMachines/extensions",
-        //     "name": "[concat(variables('appVmName'),'/', 'SetupChocolatey')]",
-        //     "location": "[resourceGroup().location]",
-        //     "apiVersion": "2019-07-01",
-        //     "dependsOn": [
-        //         "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
-        //     ],
-        //     "tags": {
-        //         "displayName": "SetupChocolatey"
-        //     },
-        //     "properties": {
-        //         "publisher": "Microsoft.Compute",
-        //         "type": "CustomScriptExtension",
-        //         "typeHandlerVersion": "1.10",
-        //         "autoUpgradeMinorVersion": true,
-        //         "settings": {
-        //             "fileUris": [
-        //                 "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
-        //             ],
-        //             "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ', variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-        //         },
-        //         "protectedSettings": {
-        //             "commandToExecute": "",
-        //             "storageAccountName": "",
-        //             "storageAccountKey": "",
-        //             "managedIdentity" : {}
-        //         }
-        //     }
-        // },
         // SQL VM Domain joining
         // {
         //     "apiVersion": "2015-06-15",
@@ -435,34 +404,5 @@
                 }
             }
         }
-        // Setup Chocolatey (package management tool)
-        // {
-        //     "type": "Microsoft.Compute/virtualMachines/extensions",
-        //     "apiVersion": "2019-07-01",
-        //     "name": "[concat(variables('appVmName'),'/', 'SetupChocolatey')]",
-        //     "location": "[resourceGroup().location]",
-        //     "dependsOn": [
-        //         "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
-        //         //"[concat('Microsoft.Compute/virtualMachines/', variables('appVmName'),'/extensions/', 'InstallWebServer')]"
-        //     ],
-        //     "properties": {
-        //         "publisher": "Microsoft.Compute",
-        //         "type": "CustomScriptExtension",
-        //         "typeHandlerVersion": "1.10",
-        //         "autoUpgradeMinorVersion":true,
-        //         "settings": {
-        //             "fileUris": [
-        //                 "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/chocopackages.ps1"
-        //             ]//,
-        //             //"commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'chocopackages.ps1')]"
-        //         },
-        //          "protectedSettings": {
-        //             "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'chocopackages.ps1')]",
-        //             "storageAccountName": "",
-        //             "storageAccountKey": "",
-        //             "managedIdentity" : {}
-        //         }
-        //     }
-        // }
     ]
 }
