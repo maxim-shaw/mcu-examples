@@ -277,62 +277,6 @@
                 }
             }
         },
-        // Setup Chocolatey (package management tool)
-        // {
-        //     "name": "SetupChocolatey",
-        //     "type": "extensions",
-        //     "location": "[resourceGroup().location]",
-        //     "apiVersion": "2015-06-15",
-        //     "dependsOn": [
-        //         "[concat('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
-        //     ],
-        //     "tags": {
-        //         "displayName": "SetupChocolatey"
-        //     },
-        //     "properties": {
-        //         "publisher": "Microsoft.Compute",
-        //         "type": "CustomScriptExtension",
-        //         "typeHandlerVersion": "1.9",
-        //         "autoUpgradeMinorVersion": true,
-        //         "settings": {
-        //             "fileUris": [
-        //                 "[concat(variables('setupChocolateyScriptLocation'),variables('setupChocolateyScriptFileName'))]"
-        //             ],
-        //             "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ',variables('chocoPackages'))]"
-        //         }
-        //     }
-        // },
-        {
-            "type": "extensions",
-            "name": "SetupChocolatey",
-            "location": "[resourceGroup().location]",
-            "apiVersion": "2019-07-01",
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/', variables('appVmName'))]"
-            ],
-            "tags": {
-                "displayName": "SetupChocolatey"
-            },
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.10",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[concat(variables('setupChocolateyScriptLocation'), variables('setupChocolateyScriptFileName'))]"
-                    ],
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                },
-                "protectedSettings": {
-                    "commandToExecute": "",
-                    "storageAccountName": "",
-                    "storageAccountKey": "",
-                    "managedIdentity" : {}
-                //     "commandToExecute": "[concat('powershell -ExecutionPolicy bypass -File ',variables('setupChocolateyScriptFileName'),' -chocoPackages ', variables('chocoPackages'))]"
-                }
-            }
-        },
         // SQL VM Domain joining
         // {
         //     "apiVersion": "2015-06-15",
