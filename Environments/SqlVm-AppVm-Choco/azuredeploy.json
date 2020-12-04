@@ -433,7 +433,7 @@
                     //"commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
                 }
             }
-        },
+        }
         // Setup Chocolatey (package management tool)
         // {
         //     "type": "Microsoft.Compute/virtualMachines/extensions",
@@ -453,10 +453,10 @@
         //             "fileUris": [
         //                 "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/chocopackages.ps1"
         //             ]//,
-        //             //"commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', './chocopackages.ps1')]"
+        //             //"commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'chocopackages.ps1')]"
         //         },
         //          "protectedSettings": {
-        //             "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', './chocopackages.ps1')]",
+        //             "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ', 'chocopackages.ps1')]",
         //             "storageAccountName": "",
         //             "storageAccountKey": "",
         //             "managedIdentity" : {}
