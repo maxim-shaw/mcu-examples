@@ -412,28 +412,28 @@
                 }
             }
         },// VM extentsion, Install WebServer
-        {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "apiVersion": "2019-12-01",
-            "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.10",
-                "autoUpgradeMinorVersion":true,
-                "settings": {
-                    // "fileUris": [
-                    //     "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
-                    // ],
-                    //"commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
-                    "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
-                }
-            }
-        },
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines/extensions",
+        //     "apiVersion": "2019-12-01",
+        //     "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
+        //     ],
+        //     "properties": {
+        //         "publisher": "Microsoft.Compute",
+        //         "type": "CustomScriptExtension",
+        //         "typeHandlerVersion": "1.10",
+        //         "autoUpgradeMinorVersion":true,
+        //         "settings": {
+        //             // "fileUris": [
+        //             //     "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
+        //             // ],
+        //             //"commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
+        //             "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
+        //         }
+        //     }
+        // },
         // Setup Chocolatey (package management tool)
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
@@ -441,8 +441,8 @@
             "name": "[concat(variables('appVmName'),'/', 'SetupChocolatey')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]",
-                "[concat('Microsoft.Compute/virtualMachines/', variables('appVmName'),'/extensions/', 'InstallWebServer')]"
+                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
+                //"[concat('Microsoft.Compute/virtualMachines/', variables('appVmName'),'/extensions/', 'InstallWebServer')]"
             ],
             "properties": {
                 "publisher": "Microsoft.Compute",
