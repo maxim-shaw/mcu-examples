@@ -157,10 +157,7 @@
         "ouPath": "OU=servers,DC=meridiancu,DC=com",
         "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
         "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
-        "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]",
-        "setupChocolateyScriptLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/visual-studio-dev-vm-chocolatey/scripts/",
-        "setupChocolateyScriptFileName": "SetupChocolatey.ps1",
-        "chocoPackages": "paint.net;notepadplusplus" // List of Chocolatey packages to install separated by a semi-colon eg. linqpad;sysinternals
+        "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
         // SQL Network Security Group
@@ -350,7 +347,10 @@
             ],
             "tags": {
                 "env": "DevTestLabs",
-                "ClientName": "MCU"
+                "ClientName": "MCU",
+                "Owner": "[
+                    reference(
+                        resourceId('Microsoft.Compute/virtualMachines', variables('appVmName')), '2019-03-01', 'Full').identity.principalId]"
             },
             "properties": {
                 "hardwareProfile": {
@@ -396,11 +396,9 @@
                 "autoUpgradeMinorVersion":true,
                 "settings": {
                     "fileUris": [
-                        //"https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
                         "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/postdeployment.ps1"
                     ],
                     "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File postdeployment.ps1"
-                    //"commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
                 }
             }
         }

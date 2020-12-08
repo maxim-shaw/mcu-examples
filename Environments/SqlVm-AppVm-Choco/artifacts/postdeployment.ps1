@@ -10,4 +10,4 @@ choco install dotnetcore-sdk -y
 choco install notepadplusplus -y
 
 # Reboot
-# Restart-Computer
+Restart-Computer
