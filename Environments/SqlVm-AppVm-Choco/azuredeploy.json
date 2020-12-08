@@ -348,9 +348,7 @@
             "tags": {
                 "env": "DevTestLabs",
                 "ClientName": "MCU",
-                "Owner": "[
-                    reference(
-                        resourceId('Microsoft.Compute/virtualMachines', variables('appVmName')), '2019-03-01', 'Full').identity.principalId]"
+                "Owner": "Maxim Shaw"
             },
             "properties": {
                 "hardwareProfile": {
