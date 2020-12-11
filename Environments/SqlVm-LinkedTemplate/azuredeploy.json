@@ -4,7 +4,6 @@
     "parameters": {
         "Environment Number": {
             "type": "int",
-            //"maxLength": 3,
             "metadata": {
                 "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
             }
@@ -90,8 +89,8 @@
         "appVmName": "[concat(variables('resourceNamePrefix'), 'ASD', parameters('Environment Number'))]",
         "appNetworkInterfaceName": "[concat(variables('appVmName'), '-nic')]",
         "sigName": "McuAppImages",
-        "sigImageDefinition": "McuAppWindowsServer",
-        "sigImageVersion": "2.0.0",
+        "sigImageDefinition": "McuWindowsAppImgDef",
+        "sigImageVersion": "2.1.1",
         "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "sqlNetworkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
@@ -154,14 +153,11 @@
                 } 
             }
         ],
-        "domainToJoin": "meridiancu.ca",
-        "ouPath": "OU=servers,DC=meridiancu,DC=ca",
+        "domainToJoin": "meridiancu.com",
+        "ouPath": "OU=servers,DC=meridiancu,DC=com",
         "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
         "appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
-        "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]",
-        "setupChocolateyScriptLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/visual-studio-dev-vm-chocolatey/scripts/",
-        "setupChocolateyScriptFileName": "SetupChocolatey.ps1",
-        "chocoPackages": "dotnet4.5.2"
+        "subnetRef": "[resourceId(parameters('Resource Group Name'), 'Microsoft.Network/virtualNetworks/subnets', parameters('Existing Virtual Network Name'), parameters('Subnet Name'))]"
     },
     "resources": [
         // SQL Network Security Group
@@ -294,12 +290,12 @@
         //         "settings": {
         //             "Name": "[variables('domainToJoin')]",
         //             "OUPath": "[variables('ouPath')]",
-        //             "User": "[concat(variables('domainToJoin'), '\\', parameters('Domain Admin Name'))]",
+        //             "User": "[concat(variables('domainToJoin'), '\\', parameters('Domain Admin Password'))]",
         //             "Restart": "true",
         //             "Options": "3" // Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
         //         },
         //         "protectedSettings": {
-        //             "Password": "[parameters('Domain Admin Password')]"
+        //         "Password": "[parameters('Domain Admin Password')]"
         //         }
         //     }
         // },
@@ -351,7 +347,8 @@
             ],
             "tags": {
                 "env": "DevTestLabs",
-                "ClientName": "MCU"
+                "ClientName": "MCU",
+                "Owner": "Maxim Shaw"
             },
             "properties": {
                 "hardwareProfile": {
@@ -381,32 +378,48 @@
                     ]
                 }
             }
-        },// VM extentsion, Install WebServer`
+        },// VM extentsion, Install WebServer
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-12-01",
             "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]",
+                "[concat(variables('databaseVmName'), '/domainjoin')]"
             ],
             "properties": {
                 "publisher": "Microsoft.Compute",
                 "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.7",
+                "typeHandlerVersion": "1.10",
                 "autoUpgradeMinorVersion":true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/Azure/azure-docs-json-samples/master/tutorial-vm-extension/installWebServer.ps1"
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/apppostdeployment.ps1"
                     ],
-                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File installWebServer.ps1"
-                    "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
-                },
-                 "protectedSettings": {
-                    "commandToExecute": "myExecutionCommand",
-                    "storageAccountName": "myStorageAccountName",
-                    "storageAccountKey": "myStorageAccountKey",
-                    "managedIdentity" : {}
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File apppostdeployment.ps1"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-12-01",
+            "name": "[concat(variables('databaseVmName'),'/', 'PrepareSqLVm')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('databaseVmName'))]",
+                "[concat(variables('databaseVmName'), '/domainjoin')]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.10",
+                "autoUpgradeMinorVersion":true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/dbpostdeployment.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File dbpostdeployment.ps1"
                 }
             }
         }
