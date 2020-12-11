@@ -4,6 +4,8 @@
     "parameters": {
         "Environment Number": {
             "type": "int",
+            "minValue": 100,
+            "maxValue": 999,
             "metadata": {
                 "description": "Give the environment a number for user VMs naming. (e.g.: 1, 2, etc.)" 
             }
