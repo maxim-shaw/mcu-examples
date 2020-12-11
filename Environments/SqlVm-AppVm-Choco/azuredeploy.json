@@ -54,8 +54,8 @@
             }
         },
         "Subnet Name": {
-        "type": "string",
-        "defaultValue": "databaseSubnet",
+            "type": "string",
+            "defaultValue": "databaseSubnet",
             "metadata": {
                 "description": "A subnet for the database VM deployment"
             }
@@ -396,7 +396,7 @@
                 "autoUpgradeMinorVersion":true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/apppostdeployment.ps1"
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/scripts/apppostdeployment.ps1"
                     ],
                     "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File apppostdeployment.ps1"
                 }
@@ -417,7 +417,7 @@
                 "autoUpgradeMinorVersion":true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/dbpostdeployment.ps1"
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/scripts/dbpostdeployment.ps1"
                     ],
                     "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File dbpostdeployment.ps1"
                 }
