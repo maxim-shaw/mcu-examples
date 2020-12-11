@@ -89,8 +89,8 @@
         "appVmName": "[concat(variables('resourceNamePrefix'), 'ASD', parameters('Environment Number'))]",
         "appNetworkInterfaceName": "[concat(variables('appVmName'), '-nic')]",
         "sigName": "McuAppImages",
-        "sigImageDefinition": "McuAppWindowsServer",
-        "sigImageVersion": "2.0.0",
+        "sigImageDefinition": "McuWindowsAppImgDef",
+        "sigImageVersion": "2.1.1",
         "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
         "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
         "sqlNetworkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
@@ -394,9 +394,30 @@
                 "autoUpgradeMinorVersion":true,
                 "settings": {
                     "fileUris": [
-                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/postdeployment.ps1"
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/apppostdeployment.ps1"
                     ],
-                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File postdeployment.ps1"
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File apppostdeployment.ps1"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-12-01",
+            "name": "[concat(variables('databaseVmName'),'/', 'PrepareSqLVm')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/',variables('databaseVmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "CustomScriptExtension",
+                "typeHandlerVersion": "1.10",
+                "autoUpgradeMinorVersion":true,
+                "settings": {
+                    "fileUris": [
+                        "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/dbpostdeployment.ps1"
+                    ],
+                    "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File dbpostdeployment.ps1"
                 }
             }
         }

@@ -1,0 +1,370 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "Environment Number": {
+            "type": "int",
+            "minValue": 100,
+            "maxValue": 999,
+            "metadata": {
+                "description": "Give a unique environment number to include in your VM names, i.e. 100-999." 
+            }
+        },
+        "VM Administrator Login": {
+            "type": "string",
+            "metadata": {
+                "description": "VM administrator login name"
+            }
+        },
+        "VM Administrator Password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "VM administrator password"
+            }
+        },
+        // "Application VM Size": {
+        //     "type": "string",
+        //     "defaultValue": "Standard_B2ms",
+        //     "allowedValues": [
+        //         "Standard_B2ms",
+        //         "Standard_B2s",
+        //         "Standard_B4ms"
+        //     ],
+        //     "metadata": {
+        //         "description": "Size of application server VM"
+        //     }
+        // },
+        "Database VM Size": {
+            "type": "string",
+            "defaultValue": "Standard_B4ms",
+            "allowedValues": [
+                "Standard_B2ms",
+                "Standard_B2s",
+                "Standard_B4ms"
+            ],
+            "metadata": {
+                "description": "Size of database server VM."
+            }
+        },
+        // "Existing Virtual Network Name": {
+        //     "type": "String",
+        //     "defaultValue": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
+        //     "metadata": {
+        //         "description": "Specify the virtual network."
+        //     }
+        // },
+        // "Subnet Name": {
+        // "type": "string",
+        // "defaultValue": "SNET-AZ1-CC-DEVQA-OLBZONE-1Q-001",
+        //     "metadata": {
+        //         "description": "Specify the subnet within the virtual network above."
+        //     }
+        // },
+        // "Resource Group Name": {
+        //     "type": "string",
+        //     "defaultValue": "RG-AZ1-CC-DEVQA-OLBZONE-1Q",
+        //     "allowedValues": [
+        //         "RG-AZ1-CC-DEVQA-OLBZONE-1Q"
+        //     ]
+        // },
+        "Domain Admin User": {
+            "type": "string",
+            "metadata": {
+                "description": "Domain administrator login name. Used to join VM to the domain."
+            }
+        },
+        "Domain Admin Password": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Domain administrator password"
+            }
+        }
+    },
+    "variables": {
+        "virtualNetworkName": "VNET-AZ1-CC-DEVQA-OLBZONE-1Q",
+        "subnetName": "SNET-AZ1-CC-DEVQA-OLBZONE-1Q-001",
+        "resourceGroupName": "RG-AZ1-CC-DEVQA-OLBZONE-1Q",
+        "resourceNamePrefix": "AZ1",
+        "databaseVmName": "[concat(variables('resourceNamePrefix'), 'DBD', parameters('Environment Number'))]",
+
+        "sigName": "SharedImageGallery",
+        "sigImageDefinition": "dbimg",
+        "sigImageVersion": "1.0.1",
+        
+        "appVmImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
+        "dbVMImage": "[resourceId('Microsoft.Compute/galleries/images/versions', variables('sigName'), variables('sigImageDefinition'), variables('sigImageVersion'))]",
+        "networkInterfaceName": "[concat(variables('databaseVmName'), '-nic')]",
+        "sqlNetworkSecurityGroupName": "[concat(variables('databaseVmName'), '-nsg')]",
+
+        "sqlNetworkSecurityGroupRules": [
+            {
+                "name": "AllowRDP",
+                "properties": {
+                    "priority": 300,
+                    "protocol": "TCP",
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "sourceAddressPrefix": "*",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*",
+                    "destinationPortRange": "3389"
+                }
+            }
+            // {
+            //     "name": "AllowSQLDbPort",
+            //     "properties": {
+            //         "priority": 310,
+            //         "protocol": "TCP",
+            //         "access": "Allow",
+            //         "direction": "Inbound",
+            //         // For secure access source and destination addresses may be explicit
+            //         "sourceAddressPrefix": "*",
+            //         "sourcePortRange": "*",
+            //         "destinationAddressPrefix": "*",
+            //         "destinationPortRange": "1433"
+            //     } 
+            // }
+        ],
+        // "appNetworkSecurityGroupRules": [
+        //     {
+        //         "name": "AllowRDP",
+        //         "properties": {
+        //             "priority": 300,
+        //             "protocol": "TCP",
+        //             "access": "Allow",
+        //             "direction": "Inbound",
+        //             "sourceAddressPrefix": "*",
+        //             "sourcePortRange": "*",
+        //             "destinationAddressPrefix": "*",
+        //             "destinationPortRange": "3389"
+        //         }
+        //     },
+        //     {
+        //         "name": "AllowHttpInbound",
+        //         "properties": {
+        //             "priority": 310,
+        //             "protocol": "TCP",
+        //             "access": "Allow",
+        //             "direction": "Inbound",
+        //             // For secure access source and destination addresses may be explicit
+        //             "sourceAddressPrefix": "*",
+        //             "sourcePortRange": "*",
+        //             "destinationAddressPrefix": "*",
+        //             "destinationPortRanges": ["80", "443"]
+        //         } 
+        //     }
+        // ],
+        "domainToJoin": "meridiancu.ca",
+        "ouPath": "OU=DevTestLabs,OU=test,OU=servers,DC=meridiancu,DC=ca",
+        "sqlNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('sqlNetworkSecurityGroupName'))]",
+        //"appNsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('appNetworkSecurityGroupName'))]",
+        "subnetRef": "[resourceId(variables('resourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+    },
+    "resources": [
+        // SQL Network Security Group
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('sqlNetworkSecurityGroupName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": "[variables('sqlNetworkSecurityGroupRules')]"
+            }
+        },
+        // SQL Network Interface (NIC) 
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('networkInterfaceName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('sqlNetworkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": false,
+                "networkSecurityGroup": {
+                    "id": "[variables('sqlNsgId')]"
+                }
+            }
+        },
+        // SQL Virtual Machine
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2019-07-01",
+            "name": "[variables('databaseVmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            ],
+            "tags": {
+                "env": "DevTestLabs",
+                "ClientName": "MCU"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('Database VM Size')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "id": "[variables('dbVMImage')]"
+                    }
+                },
+                "osProfile": {
+                    "computerName": "[variables('databaseVmName')]",
+                    "adminUsername": "[parameters('VM Administrator Login')]",
+                    "adminPassword": "[parameters('VM Administrator Password')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    //"secrets": "[]",
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        // SQL VM Domain joining
+        {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('databaseVmName'),'/joindomain')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('databaseVmName'))]"
+            ],
+            "properties": {
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.3",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "Name": "[variables('domainToJoin')]",
+                    "OUPath": "[variables('ouPath')]",
+                    "User": "[concat(variables('domainToJoin'), '\\', parameters('Domain Admin User'))]",
+                    "Restart": "true",
+                    "Options": "3" // Default value of 3 is a combination of NETSETUP_JOIN_DOMAIN (0x00000001) & NETSETUP_ACCT_CREATE (0x00000002) i.e. will join the domain and create the account on the domain. For more information see https://msdn.microsoft.com/en-us/library/aa392154(v=vs.85).aspx"
+                },
+                "protectedSettings": {
+                    "Password": "[parameters('Domain Admin Password')]"
+                }
+            }
+        }
+        // // App Network Security Group
+        // {
+        //     "type": "Microsoft.Network/networkSecurityGroups",
+        //     "apiVersion": "2020-03-01",
+        //     "name": "[variables('appNetworkSecurityGroupName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "properties": {
+        //         "securityRules": "[variables('appNetworkSecurityGroupRules')]"
+        //     }
+        // },
+        // // AppVM Network Interface (NIC)
+        // {
+        //     "type": "Microsoft.Network/networkInterfaces",
+        //     "apiVersion": "2020-03-01",
+        //     "name": "[variables('appNetworkInterfaceName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('appNetworkSecurityGroupName'))]"
+        //     ],
+        //     "properties": {
+        //         "ipConfigurations": [
+        //             {
+        //                 "name": "ipconfig1",
+        //                 "properties": {
+        //                     "privateIPAllocationMethod": "Dynamic",
+        //                     "subnet": {
+        //                         "id": "[variables('subnetRef')]"
+        //                     }
+        //                 }
+        //             }
+        //         ],
+        //         "enableAcceleratedNetworking": false,
+        //         "networkSecurityGroup": {
+        //             "id": "[variables('appNsgId')]"
+        //         }
+        //     }
+        // },
+        // // AppVM Virtual Machine
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines",
+        //     "apiVersion": "2019-07-01",
+        //     "name": "[variables('appVmName')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
+        //     ],
+        //     "tags": {
+        //         "env": "DevTestLabs",
+        //         "ClientName": "MCU"
+        //     },
+        //     "properties": {
+        //         "hardwareProfile": {
+        //             "vmSize": "[parameters('Application VM Size')]"
+        //         },
+        //          "storageProfile": {
+        //             "imageReference": {
+        //                 "id": "[variables('appVmImage')]"
+        //             }
+        //         },
+        //         "osProfile": {
+        //             "computerName": "[variables('appVmName')]",
+        //             "adminUsername": "[parameters('VM Administrator Login')]",
+        //             "adminPassword": "[parameters('VM Administrator Password')]",
+        //             "windowsConfiguration": {
+        //                 "provisionVMAgent": true,
+        //                 "enableAutomaticUpdates": true
+        //             },
+        //             //"secrets": "[]",
+        //             "allowExtensionOperations": true
+        //         },
+        //         "networkProfile": {
+        //             "networkInterfaces": [
+        //                 {
+        //                     "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('appNetworkInterfaceName'))]"
+        //                 }
+        //             ]
+        //         }
+        //     }
+        // },// VM extentsion, Install WebServer
+        // {
+        //     "type": "Microsoft.Compute/virtualMachines/extensions",
+        //     "apiVersion": "2019-12-01",
+        //     "name": "[concat(variables('appVmName'),'/', 'InstallWebServer')]",
+        //     "location": "[resourceGroup().location]",
+        //     "dependsOn": [
+        //         "[concat('Microsoft.Compute/virtualMachines/',variables('appVmName'))]"
+        //     ],
+        //     "properties": {
+        //         "publisher": "Microsoft.Compute",
+        //         "type": "CustomScriptExtension",
+        //         "typeHandlerVersion": "1.10",
+        //         "autoUpgradeMinorVersion":true,
+        //         "settings": {
+        //             "fileUris": [
+        //                 "https://raw.githubusercontent.com/maxim-shaw/mcu-examples/main/Environments/SqlVm-AppVm-Choco/artifacts/postdeployment.ps1"
+        //             ],
+        //             "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File postdeployment.ps1"
+        //         }
+        //     }
+        // }
+    ]
+}

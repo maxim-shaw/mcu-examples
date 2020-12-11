@@ -1,0 +1,6 @@
+{
+  "itemDisplayName": "DevTest Lab Environment - deploy SQL VM from Shared Image Gallery - ver 1.0.1",
+  "description": "This template deploys the SQL VM from Meridian's Shared Image Gallery.",
+  "githubUsername": "MeridianCU PoC",
+  "summary": ""
+}
